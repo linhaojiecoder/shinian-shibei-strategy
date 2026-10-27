@@ -103,6 +103,8 @@ html = f"""<!DOCTYPE html>
     --up: #ff5c5c;
     --down: #2dd4a7;
     --accent: #f0b90b;
+    --gap: 12px;
+    --pad: 18px;
   }}
   *, *::before, *::after {{ margin:0; padding:0; box-sizing:border-box; }}
   html, body {{ max-width:100%; overflow-x:hidden; }}
@@ -110,46 +112,46 @@ html = f"""<!DOCTYPE html>
     background: var(--bg);
     color: var(--text);
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-    padding: 24px 20px 60px;
+    padding: 20px 16px calc(48px + env(safe-area-inset-bottom));
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }}
   .wrap {{ width:100%; max-width:1080px; margin:0 auto; }}
-  .head {{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:14px; margin-bottom:8px; }}
+  .head {{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px; margin-bottom:16px; }}
   .head .title {{ font-size:22px; font-weight:700; letter-spacing:.5px; }}
-  .head .sub {{ color:var(--muted); font-size:13px; margin-top:5px; }}
+  .head .sub {{ color:var(--muted); font-size:13px; margin-top:4px; }}
   .date-badge {{
     background: var(--card2); border:1px solid var(--border);
-    border-radius:10px; padding:9px 14px; font-size:12px; color:var(--muted);
-    max-width:100%;
+    border-radius:10px; padding:10px 14px; font-size:12px; color:var(--muted);
+    max-width:100%; line-height:1.6;
   }}
   .date-badge b {{ color:var(--text); font-size:14px; }}
   .hero {{
     display:grid; grid-template-columns:repeat(3, minmax(0,1fr));
-    gap:14px; margin:18px 0 14px;
+    gap:var(--gap); margin:0 0 var(--gap);
   }}
   .hero .big {{
     min-width:0; max-width:100%; overflow:hidden; background:var(--card);
-    border:1px solid var(--border); border-radius:14px; padding:18px 20px;
+    border:1px solid var(--border); border-radius:14px; padding:var(--pad) 20px;
   }}
   .hero .big .label {{ color:var(--muted); font-size:12px; margin-bottom:6px; }}
   .hero .big .num {{ font-size:28px; font-weight:700; line-height:1.15; }}
   .hero .big .num.up {{ color:var(--up); }}
   .hero .big .num.down {{ color:var(--down); }}
-  .hero .big .note {{ color:var(--muted); font-size:12px; margin-top:5px; }}
-  .metrics {{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; margin-bottom:18px; }}
+  .hero .big .note {{ color:var(--muted); font-size:12px; margin-top:4px; }}
+  .metrics {{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:var(--gap); margin-bottom:0; }}
   .metrics .m {{
     min-width:0; background:var(--card); border:1px solid var(--border);
-    border-radius:12px; padding:14px 16px;
+    border-radius:12px; padding:16px;
   }}
   .metrics .m .label {{ color:var(--muted); font-size:12px; }}
   .metrics .m .num {{ font-size:20px; font-weight:700; margin-top:4px; }}
-  .section {{ margin:26px 0 14px; }}
-  .section .h {{ font-size:16px; font-weight:700; margin-bottom:3px; }}
+  .section {{ margin:24px 0 12px; }}
+  .section .h {{ font-size:16px; font-weight:700; margin-bottom:2px; }}
   .section .d {{ color:var(--muted); font-size:13px; }}
   .card {{
     background:var(--card); border:1px solid var(--border);
-    border-radius:14px; padding:18px 20px; min-width:0;
+    border-radius:14px; padding:var(--pad) 20px; min-width:0;
   }}
   .chart {{ width:100%; height:360px; }}
   .chart-sm {{ width:100%; height:280px; }}
@@ -172,14 +174,14 @@ html = f"""<!DOCTYPE html>
   .action-box {{
     display:flex; align-items:center; gap:14px; flex-wrap:wrap;
     background:var(--card); border:1px solid var(--border);
-    border-radius:14px; padding:18px 20px; margin-top:16px;
+    border-radius:14px; padding:var(--pad) 20px; margin-top:var(--gap);
   }}
   .action-box .big-tag {{
     font-size:17px; font-weight:700; padding:8px 18px; border-radius:10px;
     white-space:nowrap;
   }}
   .action-box .detail {{ color:var(--muted); font-size:14px; flex:1; min-width:200px; }}
-  .footer {{ color:var(--muted); font-size:12px; text-align:center; margin-top:40px; line-height:1.8; }}
+  .footer {{ color:var(--muted); font-size:12px; text-align:center; margin-top:32px; line-height:1.8; }}
 
   @media (max-width:900px) {{
     .hero {{ grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; }}
@@ -189,22 +191,28 @@ html = f"""<!DOCTYPE html>
     .chart {{ height:320px; }}
   }}
   @media (max-width:640px) {{
-    body {{ padding:16px 14px 48px; }}
-    .head {{ flex-direction:column; align-items:flex-start; }}
+    body {{ padding:16px 14px calc(40px + env(safe-area-inset-bottom)); }}
+    .head {{ flex-direction:column; align-items:flex-start; gap:10px; margin-bottom:14px; }}
     .head .title {{ font-size:20px; }}
-    .date-badge {{ white-space:normal; }}
+    .head .sub {{ font-size:12px; }}
+    .date-badge {{ padding:9px 12px; font-size:11px; width:100%; }}
+    .date-badge b {{ font-size:13px; }}
     .hero {{ grid-template-columns:1fr; gap:10px; }}
-    .hero .big {{ padding:16px; }}
-    .hero .big .num {{ font-size:26px; }}
+    .hero .big {{ padding:14px 16px; }}
+    .hero .big .num {{ font-size:24px; }}
     .metrics {{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }}
-    .metrics .m {{ padding:12px; }}
-    .metrics .m .num {{ font-size:18px; }}
+    .metrics .m {{ padding:14px; }}
+    .metrics .m .label {{ font-size:11px; }}
+    .metrics .m .num {{ font-size:18px; margin-top:3px; }}
+    .section {{ margin:22px 0 10px; }}
     .section .h {{ font-size:15px; }}
-    .card {{ padding:14px; }}
+    .section .d {{ font-size:12px; }}
+    .card {{ padding:14px 16px; }}
     .chart {{ height:260px; }}
     .chart-sm {{ height:220px; }}
-    .action-box {{ flex-direction:column; align-items:flex-start; gap:10px; }}
-    .action-box .detail {{ min-width:0; }}
+    .action-box {{ flex-direction:column; align-items:flex-start; gap:10px; padding:14px 16px; }}
+    .action-box .detail {{ min-width:0; font-size:13px; }}
+    .footer {{ margin-top:28px; padding:16px 0 8px; font-size:11px; }}
     table {{ min-width:460px; }}
   }}
 </style>
