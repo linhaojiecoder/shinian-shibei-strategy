@@ -16,6 +16,8 @@ trades = cash["trades"]
 
 last = nav_series[-1]
 latest_holds = hold_series[-1]["holds"]
+# 精确期末持仓（份额 + 成本价），根治 continuity 从流水反推导致的跨拆分成本失真
+latest_holdings = hold_series[-1].get("holdings", {})
 
 # 月度收益
 by_month = {}
@@ -68,6 +70,7 @@ hs300_series = [{"date": d, "nav": round(hs300_close[d]/base0, 6)} for d in nav_
 app_data = {
     "strategy_name": "十二年十倍复利策略",
     "slogan": "慢慢变富，与时间为友",
+    "data_version": 4,  # 数据版本号：成本/份额口径修复（精确持仓导出）。每次改数据口径 +1，触发 App 强制重接续
     "capital": 3000000,
     "start_date": "2014-01-02",
     "latest_date": last["date"],
@@ -80,6 +83,7 @@ app_data = {
     "latest_state": {
         "total": last["total"], "nav": last["nav"], "cash": last["cash"],
         "market": last["market"], "holds_label": latest_holds,
+        "holdings": latest_holdings,
     },
     "nav_series": nav_series,
     "hold_series": hold_series,

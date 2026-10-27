@@ -15,49 +15,62 @@ function initContinuity() {
   const { state, HIST } = ctx;
   if (!HIST || !HIST.latest_state) return;
   const ls = HIST.latest_state;
-  const finalNav = ls.nav;            // 11.411241
-  const finalTotal = ls.total;        // 34233722
-  const finalCash = ls.cash;          // 2208996
+  const finalNav = ls.nav;            // 10.507067
+  const finalTotal = ls.total;        // 31521200
+  const finalCash = ls.cash;          // 2037713
   // 期末持仓：标普500(513500) + 纳指(513100)
   const codeByLabel = {};
   eng.ETFS.forEach(e => { codeByLabel[e.label] = e.code; });
-  // 从回测交易流水还原真实持仓成本（逐笔加权：买入抬升成本，清仓归零）
-  const costMap = {};   // code -> 加权成本价
-  const qtyMap = {};    // code -> 累计份额
-  (HIST.trades || []).forEach(t => {
-    const code = t.code;
-    if (!code) return;
-    if (t.action.includes('买')) {
-      // 买入：加权抬升成本
-      const q = (qtyMap[code] || 0) + t.shares;
-      costMap[code] = q > 0 ? ((costMap[code] || 0) * (qtyMap[code] || 0) + t.price * t.shares) / q : t.price;
-      qtyMap[code] = q;
-    } else if (t.action.includes('减')) {
-      // 减仓：只减份额，成本价不变
-      const q = (qtyMap[code] || 0) - t.shares;
-      qtyMap[code] = Math.max(0, q);
-      if (q <= 0) costMap[code] = 0;
-    } else if (t.action.includes('卖')) {
-      // 卖出（清仓）：份额减，≤0 归零
-      const q = (qtyMap[code] || 0) - t.shares;
-      if (q <= 0) { qtyMap[code] = 0; costMap[code] = 0; }
-      else { qtyMap[code] = q; }
-    }
-  });
-  // 份额直接用回测流水还原的 qtyMap（精确份额），不再用市值反推。
-  // 之前用 holdsLabel/price 反推，price 取的是接续时刻(10-26)的价格而非回测期末(10-23)价，
-  // 导致份额算错（标普 6234700 vs 正确 6198800）。改为 qtyMap 直接取，彻底消除隐患。
+
+  // ==== 精确持仓还原（根治跨份额拆分成本失真）====
+  // 回测 sim_v4.py 在拆分日已正确调整 shares（×ratio）和 cost（÷ratio），
+  // 期末精确的 shares/cost 直接导出到 latest_state.holdings。
+  // 这里优先读精确值，绝不再从交易流水反推（流水价格是不复权价、跨拆分点，
+  // 反推会把拆分前旧价与拆分后新价混加权，导致成本价严重失真 —— 历史 bug 根源）。
   const holdings = {};
-  const holdsLabel = ls.holds_label || {};
-  for (const label in holdsLabel) {
-    const code = codeByLabel[label];
-    if (!code) continue;
-    const shares = Math.round(qtyMap[code] || 0);
-    if (shares <= 0) continue;
-    const cost = costMap[code] > 0 ? costMap[code] : 0;
-    holdings[code] = { shares, cost };
+  const preciseHoldings = ls.holdings || {};
+  if (Object.keys(preciseHoldings).length > 0) {
+    for (const label in preciseHoldings) {
+      const code = codeByLabel[label];
+      if (!code) continue;
+      const h = preciseHoldings[label];
+      const shares = Math.round(h.shares || 0);
+      const cost = (h.cost > 0) ? h.cost : 0;
+      if (shares <= 0) continue;
+      holdings[code] = { shares, cost };
+    }
+  } else {
+    // 兜底：极老版本 data.json 无 holdings 字段时，退回流水反推（仅兼容，正常不触发）
+    const costMap = {}; const qtyMap = {};
+    (HIST.trades || []).forEach(t => {
+      const code = t.code;
+      if (!code) return;
+      if (t.action.includes('买')) {
+        const q = (qtyMap[code] || 0) + t.shares;
+        costMap[code] = q > 0 ? ((costMap[code] || 0) * (qtyMap[code] || 0) + t.price * t.shares) / q : t.price;
+        qtyMap[code] = q;
+      } else if (t.action.includes('减')) {
+        const q = (qtyMap[code] || 0) - t.shares;
+        qtyMap[code] = Math.max(0, q);
+        if (q <= 0) costMap[code] = 0;
+      } else if (t.action.includes('卖')) {
+        const q = (qtyMap[code] || 0) - t.shares;
+        if (q <= 0) { qtyMap[code] = 0; costMap[code] = 0; }
+        else { qtyMap[code] = q; }
+      }
+    });
+    const holdsLabel = ls.holds_label || {};
+    for (const label in holdsLabel) {
+      const code = codeByLabel[label];
+      if (!code) continue;
+      const shares = Math.round(qtyMap[code] || 0);
+      if (shares <= 0) continue;
+      const cost = costMap[code] > 0 ? costMap[code] : 0;
+      holdings[code] = { shares, cost };
+    }
   }
-  // 现金直接用 latest_state 的 cash（回测期末现金），份额已由流水精确还原
+
+  // 现金直接用 latest_state 的 cash（回测期末现金）
   const cash = Math.max(0, finalCash);
 
   state.capital = Math.round(finalTotal);

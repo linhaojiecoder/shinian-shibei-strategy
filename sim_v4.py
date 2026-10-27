@@ -236,7 +236,12 @@ def run_backtest(mode="cash"):
         nav_arr.append(nav)
         nav_series.append({"date": d, "nav": round(nav,6), "total": round(total,0),
                            "cash": round(cash,0), "market": round(mv,0)})
-        hold_series.append({"date": d, "holds": {LABEL[c]: round(h["shares"]*close_raw[c].get(d,0),0) for c, h in holdings.items()}})
+        # hold_series 同时记录「市值」（旧字段，兼容）与「精确份额 shares + 成本价 cost」（新字段，根治成本失真）
+        hold_series.append({
+            "date": d,
+            "holds": {LABEL[c]: round(h["shares"]*close_raw[c].get(d,0),0) for c, h in holdings.items()},
+            "holdings": {LABEL[c]: {"shares": h["shares"], "cost": round(h["cost"], 6)} for c, h in holdings.items()},
+        })
 
     # 汇总
     navs = [x["nav"] for x in nav_series]

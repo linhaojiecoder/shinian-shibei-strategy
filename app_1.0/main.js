@@ -23,7 +23,7 @@ continuity.init(ctx);
 trading.init(ctx);
 report.init(ctx);
 
-// ---------- 历史回测序列（2014→2026-10-23），供组合总览接续 ----------
+// ---------- 历史回测序列（2014→2026-10-26），供组合总览接续 ----------
 const HIST_FILE = path.join(__dirname, 'src', 'data.json');
 try {
   ctx.HIST = JSON.parse(fs.readFileSync(HIST_FILE, 'utf8'));
@@ -420,10 +420,15 @@ app.whenReady().then(async () => {
   ctx.state = eng.loadState();
   registerIpc();
   createWindow();
-  // 首次接续历史回测：先拉价格，再把实盘模拟盘初始化为回测期末状态
-  if (!ctx.state.continuityDone) {
+  // 接续历史回测：首次接续，或数据版本升级后强制重接续（用精确持仓/成本重建，杜绝旧口径残留）。
+  // data_version 每次改数据口径 +1，只要 state.dataVersion < HIST.data_version 就重新接续。
+  const histVersion = (ctx.HIST && ctx.HIST.data_version) || 0;
+  const needReconnect = !ctx.state.continuityDone || (ctx.state.dataVersion || 0) < histVersion;
+  if (needReconnect) {
     await refreshData();
     continuity.initContinuity();
+    ctx.state.dataVersion = histVersion;
+    eng.saveState(ctx.state);
   }
   runUpdate();
   scheduler.scheduleNext(runUpdate);

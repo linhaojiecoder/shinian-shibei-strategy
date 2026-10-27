@@ -254,7 +254,7 @@ function saveState(st) {
 }
 
 // 当前净值：净值序列基数 = 回测起步本金 300万（2014年 nav=1.0 → 300万），
-// 不能除以 st.capital（接续后被设为期末总资产 3423万，会导致新净值≈1.0、曲线断崖）
+// 不能除以 st.capital（接续后被设为期末总资产 3152万，会导致新净值≈1.0、曲线断崖）
 const BASE_CAPITAL = 3000000;
 function currentNav(st, closeOn) {
   let mv = 0;
