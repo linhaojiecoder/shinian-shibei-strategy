@@ -75,7 +75,7 @@ base0 = hs300_close[nav_dates[0]]
 hs300_series = [{"date": d, "nav": round(hs300_close[d]/base0, 6)} for d in nav_dates]
 
 app_data = {
-    "strategy_name": "十二年十倍复利策略",
+    "strategy_name": "慢富十倍·复利策略",
     "slogan": "慢慢变富，与时间为友",
     "data_version": 4,  # 数据版本号：成本/份额口径修复（精确持仓导出）。每次改数据口径 +1，触发 App 强制重接续
     "capital": 3000000,

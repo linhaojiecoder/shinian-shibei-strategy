@@ -8,7 +8,7 @@ APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$APP_DIR"
 
 ELECTRON_APP="$APP_DIR/node_modules/electron/dist/Electron.app"
-APP_NAME="十二年十倍复利策略"
+APP_NAME="慢富十倍·复利策略"
 OUT_DIR="$APP_DIR/dist"
 TARGET="$OUT_DIR/$APP_NAME.app"
 

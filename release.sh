@@ -6,7 +6,7 @@ set -e
 cd "$(dirname "$0")"
 
 PY=/Users/linhaojie/.workbuddy/binaries/python/versions/3.13.12/bin/python3
-APP_NAME="十二年十倍复利策略"
+APP_NAME="慢富十倍·复利策略"
 
 echo "========== 1. 回测（波动率目标版，2014-2026 全周期，无前视偏差）=========="
 $PY sim_full_v3.py

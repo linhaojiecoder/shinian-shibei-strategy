@@ -1,4 +1,4 @@
-// 十二年十倍复利策略 · 信号引擎（Node.js 版，内置，无外部依赖）
+// 慢富十倍·复利策略 · 信号引擎（Node.js 版，内置，无外部依赖）
 // 与 live/signal_engine.py 逻辑完全一致，供 Electron 主进程使用。
 // 数据源：腾讯实时行情 HTTP 接口（qt.gtimg.cn），纯内置请求，无需 westock/Python。
 

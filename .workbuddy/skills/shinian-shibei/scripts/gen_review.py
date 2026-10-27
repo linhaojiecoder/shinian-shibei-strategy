@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""十二年十倍策略 · 复盘报告生成器
+"""慢富十倍·复利策略 · 复盘报告生成器
 读 sim_v4.json + app_1.0/src/data.json，输出一份 Markdown 复盘 + 关键指标 JSON。
 供 skill 复盘流程与定时自动化复用，保证口径一致、格式统一。
 """
@@ -56,7 +56,7 @@ def main():
 
     # 输出 Markdown 复盘
     lines = []
-    lines.append(f"# 十二年十倍策略 · 复盘 {last['date']}")
+    lines.append(f"# 慢富十倍·复利策略 · 复盘 {last['date']}")
     lines.append("")
     lines.append("## 核心指标")
     lines.append("")

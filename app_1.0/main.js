@@ -1,4 +1,4 @@
-// Electron 主进程：十二年十倍复利策略 · 实盘跟踪版
+// Electron 主进程：慢富十倍·复利策略 · 实盘跟踪版
 const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -401,7 +401,7 @@ function createWindow() {
     height: 860,
     minWidth: 1000,
     minHeight: 680,
-    title: '十二年十倍复利策略 · 实盘跟踪',
+    title: '慢富十倍·复利策略 · 实盘跟踪',
     backgroundColor: '#0a0e14',
     webPreferences: {
       nodeIntegration: false,

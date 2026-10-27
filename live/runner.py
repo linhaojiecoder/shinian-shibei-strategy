@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-十二年十倍复利策略 · 实盘跟踪主流程
+慢富十倍·复利策略 · 实盘跟踪主流程
 
 流程（每个交易日 15:05 运行）：
   1. fetch_live 增量拉取 5 只 ETF 最新日线
@@ -107,7 +107,7 @@ def format_report(st, signal, data):
     )
 
     lines = []
-    lines.append(f"## 十二年十倍 · 跟踪日报 {latest}")
+    lines.append(f"## 慢富十倍 · 跟踪日报 {latest}")
     lines.append("")
     lines.append(f"**当前净值：{nav:.4f}**（本金 ¥{st['capital']:,.0f}）")
     lines.append(f"现金：¥{st['cash']:,.0f}")

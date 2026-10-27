@@ -25,7 +25,7 @@ function writeDailyReport(todayTrades) {
     const total = state.cash + Object.keys(state.holdings).reduce((s, c) => s + state.holdings[c].shares * (closeOn[c] || 0), 0);
 
     const lines = [];
-    lines.push(`## 十二年十倍 · 模拟盘日报 ${latest}`);
+    lines.push(`## 慢富十倍 · 模拟盘日报 ${latest}`);
     lines.push('');
     lines.push(`当前净值 **${nav.toFixed(4)}**（起步本金 ¥3,000,000）`);
     lines.push(`总资产 ¥${Math.round(total).toLocaleString()}｜现金 ¥${Math.round(state.cash).toLocaleString()}`);

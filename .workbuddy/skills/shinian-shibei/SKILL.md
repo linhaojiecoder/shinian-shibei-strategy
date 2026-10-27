@@ -1,19 +1,19 @@
 ---
 name: shinian-shibei
 description: >-
-  「十二年十倍复利策略」专属复盘与持仓管理。运行本地回测脚本更新净值/持仓/成本，生成复盘报告，写入 Obsidian 知识库。
-  触发词：十二年十倍、复盘、持仓、净值、调仓信号、今日操作、策略复盘、收益核对、成本核对。
+  「慢富十倍·复利策略」专属复盘与持仓管理。运行本地回测脚本更新净值/持仓/成本，生成复盘报告，写入 Obsidian 知识库。
+  触发词：慢富十倍、复盘、持仓、净值、调仓信号、今日操作、策略复盘、收益核对、成本核对。
 agent_created: true
 version: 1.0.0
-display_name: "十二年十倍复利策略"
-display_name_zh: "十二年十倍复利策略"
+display_name: "慢富十倍·复利策略"
+display_name_zh: "慢富十倍·复利策略"
 display_name_en: "Shinian Shibei Strategy"
-description_zh: "十二年十倍复利策略的每日复盘、持仓成本核对、净值更新与调仓信号，输出内联 HTML 报告并写入 Obsidian。"
+description_zh: "慢富十倍·复利策略的每日复盘、持仓成本核对、净值更新与调仓信号，输出内联 HTML 报告并写入 Obsidian。"
 description_en: "Daily review, holdings/cost verification, NAV update and rebalance signals for the Shinian-Shibei strategy."
 visibility: "private"
 ---
 
-# 十二年十倍复利策略 · 复盘与持仓管理
+# 慢富十倍·复利策略 · 复盘与持仓管理
 
 ## 这是什么
 
@@ -88,7 +88,7 @@ python3 ~/.workbuddy/skills/shinian-shibei/scripts/gen_review.py
 
 ### 第四步：写入 Obsidian 知识库
 
-把当日复盘追加到 `obsidian-vault/03-每日沟通日志/YYYY-MM-DD.md`（若无则新建），并同步更新 `obsidian-vault/02-项目细节/十二年十倍复利策略.md` 里的「最新状态」小节。
+把当日复盘追加到 `obsidian-vault/03-每日沟通日志/YYYY-MM-DD.md`（若无则新建），并同步更新 `obsidian-vault/02-项目细节/慢富十倍·复利策略.md` 里的「最新状态」小节。
 
 ## 关键口径速查
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""十二年十倍策略 · 精美 HTML 复盘页面生成器
+"""慢富十倍·复利策略 · 精美 HTML 复盘页面生成器
 读 app_1.0/src/data.json，生成自包含 HTML（数据内嵌 + ECharts 图表）。
 双击用浏览器打开即可，颜色跟随 A 股习惯（涨红跌绿）。
 输出：backtest_data/复盘报告.html
@@ -90,7 +90,7 @@ html = f"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>十二年十倍策略 · 复盘报告</title>
+<title>慢富十倍·复利策略 · 复盘报告</title>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 <style>
   :root {{
@@ -221,7 +221,7 @@ html = f"""<!DOCTYPE html>
 <div class="wrap">
   <div class="head">
     <div>
-      <div class="title">十二年十倍复利策略</div>
+      <div class="title">慢富十倍·复利策略</div>
       <div class="sub">慢慢变富，与时间为友 · A股 ETF 动量轮动</div>
     </div>
     <div class="date-badge">

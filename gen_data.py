@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""生成 App 数据文件（十二年十倍复利策略）
+"""生成 App 数据文件（慢富十倍·复利策略）
 - 统一用 2016-01 起十年复利回放数据（无前视偏差）
 - 计算"今日操作"信号（哪些标的满足三关买入/跌破MA20卖出）
 """
@@ -78,7 +78,7 @@ for d in nav_dates:
     hs300_series.append({'date': d, 'nav': round(hs300_close[d]/base0, 6)})
 
 app_data = {
-    'strategy_name': '十二年十倍复利策略',
+    'strategy_name': '慢富十倍·复利策略',
     'slogan': '慢慢变富，与时间为友',
     'capital': 3000000,
     'start_date': '2014-01-02',

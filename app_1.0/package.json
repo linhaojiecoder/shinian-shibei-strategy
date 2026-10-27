@@ -1,7 +1,7 @@
 {
   "name": "shinian-shibei-strategy",
   "version": "3.3.2",
-  "description": "十二年十倍复利策略 · 慢慢变富 桌面应用",
+  "description": "慢富十倍·复利策略 · 慢慢变富 桌面应用",
   "main": "main.js",
   "author": "linhaojie",
   "license": "MIT",
@@ -11,7 +11,7 @@
   },
   "build": {
     "appId": "com.linhaojie.momentum",
-    "productName": "十二年十倍复利策略",
+    "productName": "慢富十倍·复利策略",
     "files": [
       "main.js",
       "src/**/*"
