@@ -584,6 +584,102 @@ function renderTrades() {
 // ============ 实盘跟踪 ============
 let livePayload = null; // 保存最新实盘 payload，供组合总览接续
 
+// 浏览器直开（无 strategyAPI）时：从 data.json 构造与 buildPayload 等价的快照 payload，
+// 让"今日操作 + 下次调仓预告 + 完整持仓明细 + 组合总览"无需桌面端也能完整渲染。
+// 唯一缺失的是每 5 分钟的盘中实时刷新；数据以 data.json 快照为准。
+function buildSnapshotPayload() {
+  if (!DATA || !DATA.latest_state) return null;
+  const L = DATA.latest_state;
+  const latest = DATA.latest_date;
+
+  // 价格映射：来自 signals（{name, price}）
+  const priceByName = {};
+  (DATA.signals || []).forEach(s => { priceByName[s.name] = s.price; });
+
+  // holdings：dict → 数组（renderLive 用数组形态）
+  const holdings = [];
+  const holdDict = L.holdings || {};
+  for (const name in holdDict) {
+    const h = holdDict[name];
+    const price = priceByName[name];
+    const value = h.mv || 0;
+    const costTotal = (h.shares || 0) * (h.cost || 0);
+    const profit = h.total_pnl || 0;
+    const dayPnl = h.day_pnl || 0;
+    holdings.push({
+      code: name, label: name,
+      shares: h.shares || 0,
+      cost: h.cost || 0,
+      price: price != null ? price : 0,
+      value: value,
+      costTotal: costTotal,
+      profit: profit,
+      profitPct: costTotal > 0 ? profit / costTotal : 0,
+      dayPnl: dayPnl,
+      dayPnlPct: (value - dayPnl) !== 0 && value > 0 ? dayPnl / (value - dayPnl) : 0,
+      positionPct: (h.weight != null ? h.weight : 0) / 100,
+      since: null, // data.json 无精确买入日，持股天数用 hold_days 兜底（下方覆盖）
+      holdDays: h.hold_days != null ? h.hold_days : null,
+    });
+  }
+
+  // etfDetail：五标的信号（renderLive 用 s.label/s.mom/s.vol/s.price）
+  const etfDetail = (DATA.signals || []).map(s => ({
+    code: s.name, label: s.name,
+    mom: s.mom / 100, vol: s.vol / 100, price: s.price,
+  }));
+
+  // today_action → isRebalance / actions / target
+  const ta = DATA.today_action || {};
+  const isRebalance = ta.is_friday === true;
+  const target = []; // data.json 无目标列表，用当前持仓兜底
+  for (const name in holdDict) target.push(name);
+
+  // 下次调仓日：从 latest 之后找第一个"双周周五"（14 天相位，锚定 latest_date 后最近周五）
+  let nextRebalance = null;
+  try {
+    const cur = new Date(latest + 'T00:00:00');
+    for (let offset = 1; offset <= 28; offset++) {
+      const d = new Date(cur.getTime() + offset * 86400000);
+      const dow = d.getDay();
+      if (dow !== 5) continue; // 只看周五
+      const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      // 相位：距 latest 的周五，取 14 天整数倍；无精确锚点时直接取最近一个周五
+      const diffDays = Math.round((d - cur) / 86400000);
+      if (diffDays % 14 === 0 || nextRebalance === null) {
+        nextRebalance = { date: ds, weekday: '周五' };
+        if (diffDays % 14 === 0) break;
+      }
+    }
+  } catch (e) { nextRebalance = null; }
+
+  // overviewSeries：直接映射 nav_series（date/nav/total 均已含）
+  const overviewSeries = (DATA.nav_series || []).map(x => ({ date: x.date, nav: x.nav, total: Math.round(x.total) }));
+
+  return {
+    latest,
+    capital: DATA.capital,
+    cash: L.cash,
+    nav: L.nav,
+    holdings,
+    etfDetail,
+    target,
+    scale: 1,
+    isRebalance,
+    actions: [],
+    each: 0,
+    total: L.total,
+    tradeLog: [],
+    pendingSignal: null,
+    nextRebalance,
+    isPaperTrading: false,
+    lastUpdate: '快照数据（非实时）',
+    overviewSeries,
+    _snapshot: true,
+    _todayAction: ta,
+  };
+}
+
 function renderLive(p) {
   if (!p) return;
   livePayload = p;
@@ -606,7 +702,32 @@ function renderLive(p) {
     </div>`;
   }
 
-  if (p.isRebalance) {
+  // 快照模式（浏览器直开）：用 data.json 的 today_action 精确文案
+  if (p._snapshot && p._todayAction) {
+    const ta = p._todayAction;
+    const titleMap = {
+      'buy': '📌 今日调仓买入',
+      'sell': '📌 今日调仓卖出',
+      'hold': '📌 今日操作：继续持有',
+      'empty': '📌 今日操作：空仓观望',
+    };
+    const title = titleMap[ta.type] || ('📌 今日操作：' + (ta.title || ta.type || ''));
+    const held = (p.holdings || []).map(h => h.label).join('、') || '无持仓';
+    let buyHtml = '';
+    if (ta.buy && ta.buy.length) {
+      buyHtml = `<div style="margin-top:6px;font-size:13px;color:var(--red);">买入：${ta.buy.join('、')}</div>`;
+    }
+    let sellHtml = '';
+    if (ta.sell && ta.sell.length) {
+      sellHtml = `<div style="margin-top:4px;font-size:13px;color:var(--green);">卖出：${ta.sell.join('、')}</div>`;
+    }
+    ap.innerHTML = `<div class="action-content" id="actionContent" style="background:linear-gradient(135deg,rgba(240,185,11,.08),transparent);border:1px solid rgba(240,185,11,.25);border-radius:10px;padding:14px 16px;">
+      <div style="font-size:14px;font-weight:700;color:var(--gold);margin-bottom:6px;">${title}（${p.latest}）</div>
+      ${ta.detail ? `<div style="font-size:13px;color:var(--text);">${ta.detail}</div>` : `<div style="font-size:13px;color:var(--muted);">当前持有：${held}</div>`}
+      ${buyHtml}${sellHtml}
+      ${nextRebHtml}
+    </div>`;
+  } else if (p.isRebalance) {
     const actHtml = (p.actions || []).map(a => {
       const color = a.type === 'buy' ? 'var(--red)' : (a.type === 'sell' || a.type === 'reduce') ? 'var(--green)' : 'var(--muted)';
       const icon = a.type === 'buy' ? '🟢' : (a.type === 'sell' || a.type === 'reduce') ? '🔴' : '⚪';
@@ -645,7 +766,7 @@ function renderLive(p) {
       p.holdings.map(h => {
         const col = ud(h.profit);
         const colD = ud(h.dayPnl);
-        const hd = daysBetween(h.since, p.latest);
+        const hd = (h.holdDays != null) ? h.holdDays : daysBetween(h.since, p.latest);
         return `<tr>
           <td><div class="ths-name" style="color:${col};">${h.label}</div><div class="ths-num">${Math.round(h.value).toLocaleString()}</div></td>
           <td style="text-align:right;"><div class="ths-num" style="color:${col};">${sg(h.profit)}${Math.round(h.profit).toLocaleString()}</div><div class="ths-num" style="color:${col};">${sg(h.profitPct*100)}${(h.profitPct*100).toFixed(2)}%</div></td>
@@ -685,8 +806,14 @@ async function loadLive() {
       document.getElementById('todayActionPanel').innerHTML = `<div class="empty">实盘引擎加载失败：${e.message}</div>`;
     }
   } else {
-    // 非 Electron 环境（浏览器直接打开）提示
-    document.getElementById('todayActionPanel').innerHTML = `<div class="empty">实盘跟踪需在桌面软件中运行（数据实时从行情接口拉取）</div>`;
+    // 浏览器直接打开：用 data.json 快照渲染完整页面（今日操作/持仓/组合总览），仅缺盘中实时刷新
+    try {
+      const snap = buildSnapshotPayload();
+      if (snap) renderLive(snap);
+      else document.getElementById('todayActionPanel').innerHTML = `<div class="empty">暂无数据</div>`;
+    } catch (e) {
+      document.getElementById('todayActionPanel').innerHTML = `<div class="empty">快照渲染失败：${e.message}</div>`;
+    }
   }
 }
 
