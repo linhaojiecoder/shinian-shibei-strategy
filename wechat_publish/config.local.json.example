@@ -1,0 +1,6 @@
+{
+  "appid": "在这里填你的 AppID",
+  "secret": "在这里填你的 AppSecret（严禁提交到 Git）",
+  "author": "慢富十倍",
+  "publish_dir": "/Users/linhaojie/WorkBuddy/2026-10-12-21-59-24/wechat_publish"
+}

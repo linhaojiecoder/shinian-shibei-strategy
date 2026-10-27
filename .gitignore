@@ -25,3 +25,8 @@ backtest_data/review_latest.md
 # 编辑器
 .vscode/
 .idea/
+
+# 公众号密钥（含 AppSecret，严禁入库）
+wechat_publish/config.local.json
+wechat_publish/*_cover.png
+wechat_publish/*.log
