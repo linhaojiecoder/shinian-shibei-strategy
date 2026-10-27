@@ -192,9 +192,6 @@
 
     <div class="cards" id="cards"></div>
 
-    <!-- 12年实测成绩 -->
-    <div class="hero" id="heroBand"></div>
-
     <div class="panel">
       <h2><span class="bar"></span>持仓明细</h2>
       <div id="holdingsPanel"></div>
@@ -293,18 +290,7 @@ function renderCards(cardsArray){
   }).join('');
 }
 
-// 渲染 hero 横幅：h = {title,startLabel,endLabel,ann,mdd,sharpe,calmar,mul}
-function renderHero(h){
-  document.getElementById('heroBand').innerHTML = `
-    <div class="hero-title">${h.title}<br><span class="big">${h.startLabel} → ${h.endLabel}</span></div>
-    <div class="hero-metrics">
-      <div class="hero-metric"><div class="v hl-ann">${h.ann.toFixed(2)}%</div><div class="k">年化收益</div></div>
-      <div class="hero-metric"><div class="v hl-mdd">-${h.mdd.toFixed(2)}%</div><div class="k">最大回撤</div></div>
-      <div class="hero-metric"><div class="v hl-sharpe">${h.sharpe.toFixed(2)}</div><div class="k">夏普比率</div></div>
-      <div class="hero-metric"><div class="v hl-calmar">${h.calmar.toFixed(3)}</div><div class="k">卡玛比率</div></div>
-      <div class="hero-metric"><div class="v" style="color:var(--text);">${h.mul}倍</div><div class="k">累计倍数</div></div>
-    </div>`;
-}
+// （hero 横幅渲染函数已移除：按用户要求不再显示年化/回撤/夏普/卡玛/累计倍数）
 
 // 渲染净值曲线（累计收益率 %，单线）；totalOf(idx) 返回该点总资产，保持历史/实盘各自 tooltip 口径
 function renderNavChart(dates, navs, totalOf){
@@ -385,15 +371,7 @@ function render(){
     {cls: navPct>=0?'c-red':'c-green', lbl:'累计收益', val:(navPct>=0?'+':'')+navPct.toFixed(2)+'%', sub:'年化 '+(ann>=0?'+':'')+ann.toFixed(2)+'% · 2014至今'},
   ]);
 
-  // 12年实测成绩横幅
-  const mdd = S.mdd, sharpe = S.sharpe, calmar = S.calmar || (S.ann / S.mdd);
-  const finalMul = (L.total / DATA.capital).toFixed(1);
-  renderHero({
-    title:'12年实测',
-    startLabel:'300万',
-    endLabel:Math.round(L.total).toLocaleString(),
-    ann:ann, mdd:mdd, sharpe:sharpe, calmar:calmar, mul:finalMul
-  });
+  // 12年实测成绩横幅（已移除：按用户要求不再显示年化/回撤/夏普/卡玛/累计倍数）
 
   document.getElementById('updateTime').textContent = '数据截至 ' + DATA.latest_date;
   document.getElementById('latestDate').textContent = DATA.latest_date;
@@ -533,13 +511,7 @@ function renderOverview() {
   // 覆盖指标卡与 hero（最新实盘状态）
   try {
     const last = os[os.length - 1];
-    const nav = last.nav;
     const total = last.total;
-    const navPct = +((nav - 1) * 100).toFixed(2);
-    const startTotal = os[0].total;
-    const years = (os.length / 244).toFixed(1);
-    const ann = navPct > 0 ? +((Math.pow(nav, 244 / os.length) - 1) * 100).toFixed(2) : 0;
-    const mul = (total / startTotal).toFixed(1);
 
     // 指标卡（同花顺式：总资产/总盈亏/当日盈亏/总市值/可用）
     const hs5 = livePayload.holdings || [];
@@ -563,14 +535,7 @@ function renderOverview() {
       { cls: '', lbl: '仓位', val: (total > 0 ? (liveMkt / total * 100).toFixed(1) : '0') + '%', color: '' },
     ]);
 
-    // hero 横幅
-    const S = DATA.summary;
-    renderHero({
-      title:'12年+实时',
-      startLabel:Math.round(startTotal).toLocaleString(),
-      endLabel:Math.round(total).toLocaleString(),
-      ann:ann, mdd:S.mdd, sharpe:S.sharpe, calmar:(S.calmar || S.ann / S.mdd), mul:mul
-    });
+    // hero 横幅（已移除：按用户要求不再显示）
 
     document.getElementById('updateTime').textContent = '数据截至 ' + last.date + ' · 更新于 ' + (livePayload.lastUpdate || '--');
   } catch (e) {}
