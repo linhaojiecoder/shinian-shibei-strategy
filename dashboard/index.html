@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>300万动量轮动 · 实时仪表盘</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#0e1117;color:#e6e8eb;padding:20px;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  .top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .top h1{font-size:20px;}
+  .top .time{font-size:12px;color:#8b949e;}
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+  .card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:16px;}
+  .card .label{font-size:12px;color:#8b949e;}
+  .card .val{font-size:24px;font-weight:700;margin-top:6px;}
+  .up{color:#f0b90b;} .down{color:#0ecb81;} .hold{color:#f0b90b;font-weight:700;} .drop{color:#8b949e;}
+  .buy{color:#f0b90b;font-weight:700;} .sell{color:#0ecb81;font-weight:700;}
+  .panel{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:18px;margin-bottom:16px;}
+  .panel h2{font-size:15px;margin-bottom:14px;padding-left:10px;border-left:3px solid #f0b90b;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{padding:9px 8px;text-align:center;border-bottom:1px solid #21262d;}
+  th{color:#8b949e;font-weight:500;font-size:12px;}
+  .code{font-size:11px;color:#8b949e;}
+  .chart{height:300px;}
+  .signal-big{font-size:26px;font-weight:700;color:#f0b90b;text-align:center;padding:14px;}
+  .note{font-size:11px;color:#8b949e;line-height:1.6;margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>📊 300万 · 多资产动量轮动仪表盘</h1>
+    <div class="time">信号日期 2026-10-23 ｜ 生成于 2026-10-23 14:50</div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="label">总资产</div><div class="val up">¥2,951,780</div></div>
+    <div class="card"><div class="label">持仓市值</div><div class="val">¥0</div></div>
+    <div class="card"><div class="label">现金（货基）</div><div class="val">¥2,951,780</div></div>
+    <div class="card"><div class="label">累计净值 / 收益</div><div class="val down">0.9839<span style="font-size:14px;">(-1.61%)</span></div></div>
+  </div>
+
+  <div class="panel">
+    <h2>当前信号：空仓（货基）</h2>
+    <div class="signal-big">空仓（货基）</div>
+    <div class="note">规则：20日涨幅前3名，过三关（涨幅&gt;0 + 站上MA20 + 波动率≤2%）等权持有，跌破MA20当天清仓。</div>
+  </div>
+
+    <div class="panel">
+    <h2>持仓明细</h2>
+    <table>
+      <tr><th>标的</th><th>份额</th><th>成本价</th><th>现价</th><th>市值</th><th>占比</th><th>持有收益</th></tr>
+      <tr><td colspan="7" style="color:#999;">当前空仓，资金在货基</td></tr>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>五标的信号（今日）</h2>
+    <table>
+      <tr><th>标的</th><th>收盘/现价</th><th>20日涨幅</th><th>20日波动率</th><th>vs MA20</th><th>判定</th></tr>
+      
+        <tr>
+          <td><b>纳指</b><br><span class="code">513100</span></td>
+          <td>2.240</td>
+          <td class="up">+0.90%</td>
+          <td>1.32%</td>
+          <td>✗跌破</td>
+          <td class="drop">剔除</td>
+        </tr>
+        <tr>
+          <td><b>标普500</b><br><span class="code">513500</span></td>
+          <td>2.604</td>
+          <td class="down">-2.03%</td>
+          <td>0.99%</td>
+          <td>✗跌破</td>
+          <td class="drop">剔除</td>
+        </tr>
+        <tr>
+          <td><b>黄金</b><br><span class="code">518880</span></td>
+          <td>8.203</td>
+          <td class="down">-7.37%</td>
+          <td>1.14%</td>
+          <td>✗跌破</td>
+          <td class="drop">剔除</td>
+        </tr>
+        <tr>
+          <td><b>沪深300</b><br><span class="code">510300</span></td>
+          <td>4.177</td>
+          <td class="down">-7.83%</td>
+          <td>0.94%</td>
+          <td>✗跌破</td>
+          <td class="drop">剔除</td>
+        </tr>
+        <tr>
+          <td><b>创业板</b><br><span class="code">159915</span></td>
+          <td>2.704</td>
+          <td class="down">-18.53%</td>
+          <td>2.12%</td>
+          <td>✗跌破</td>
+          <td class="drop">剔除</td>
+        </tr>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>净值曲线</h2>
+    <div id="navChart" class="chart"></div>
+  </div>
+
+  <div class="panel">
+    <h2>最近交易记录</h2>
+    <table>
+      <tr><th>日期</th><th>动作</th><th>标的</th><th>份额</th><th>金额</th></tr>
+      
+        <tr><td>2026-10-21</td><td class="sell">卖出</td><td>纳指</td><td>1,278,200</td><td>¥2,951,557</td></tr>
+        <tr><td>2026-10-19</td><td class="buy">买入</td><td>纳指</td><td>1,278,200</td><td>¥2,999,777</td></tr>
+    </table>
+  </div>
+
+  <div class="note" style="text-align:center;padding:16px;">
+    数据源：真实行情（westock）｜ 300万模拟盘 ｜ 仅供个人参考，不构成投资建议<br>
+    回测年化55%/回撤-8%为历史理想值，实盘受交易成本影响，请按年化20-30%预期
+  </div>
+</div>
+<script>
+  var navDates = ["2026-10-19", "2026-10-20", "2026-10-21", "2026-10-22", "2026-10-23"];
+  var navVals = [0.9992, 0.9945, 0.9839, 0.9839, 0.9839];
+  var totalVals = [2997602.1, 2983541.9, 2951780.16, 2951780.16, 2951780.16];
+  var chart = echarts.init(document.getElementById('navChart'));
+  chart.setOption({
+    backgroundColor: 'transparent',
+    grid: {left: 60, right: 20, top: 30, bottom: 30},
+    tooltip: {trigger: 'axis'},
+    xAxis: {type: 'category', data: navDates, axisLine: {lineStyle: {color: '#30363d'}}, axisLabel: {color: '#8b949e'}},
+    yAxis: {
+      type: 'value', scale: true,
+      axisLabel: {color: '#8b949e'},
+      splitLine: {lineStyle: {color: '#21262d'}}
+    },
+    series: [{
+      name: '总资产(万元)',
+      type: 'line',
+      data: totalVals.map(function(v){return (v/10000).toFixed(2);}),
+      smooth: true,
+      showSymbol: false,
+      lineStyle: {color: '#f0b90b', width: 2},
+      areaStyle: {color: 'rgba(240,185,11,0.12)'}
+    }]
+  });
+  window.addEventListener('resize', function(){chart.resize();});
+</script>
+</body>
+</html>

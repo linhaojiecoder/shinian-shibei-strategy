@@ -1,0 +1,145 @@
+[
+  {
+    "ann": 16.49,
+    "mdd": 16.656,
+    "sharpe": 1.03,
+    "calmar": 0.99,
+    "trades": 280,
+    "total_ret": 414.978,
+    "final": 15449325.614,
+    "years": 10.738,
+    "name": "A·基线 等权TOP2"
+  },
+  {
+    "ann": 17.383,
+    "mdd": 16.591,
+    "sharpe": 1.076,
+    "calmar": 1.048,
+    "trades": 303,
+    "total_ret": 458.978,
+    "final": 16769346.309,
+    "years": 10.738,
+    "name": "A·RP(1/vol) TOP2"
+  },
+  {
+    "ann": 17.661,
+    "mdd": 19.217,
+    "sharpe": 1.153,
+    "calmar": 0.919,
+    "trades": 313,
+    "total_ret": 473.374,
+    "final": 17201208.935,
+    "years": 10.738,
+    "name": "A·RP(1/vol) TOP3"
+  },
+  {
+    "ann": 19.046,
+    "mdd": 19.088,
+    "sharpe": 1.225,
+    "calmar": 0.998,
+    "trades": 318,
+    "total_ret": 550.151,
+    "final": 19504526.99,
+    "years": 10.738,
+    "name": "A·ERC TOP3"
+  },
+  {
+    "ann": 19.791,
+    "mdd": 20.006,
+    "sharpe": 1.284,
+    "calmar": 0.989,
+    "trades": 280,
+    "total_ret": 595.204,
+    "final": 20856128.987,
+    "years": 10.738,
+    "name": "A·最小方差 TOP3"
+  },
+  {
+    "ann": 20.018,
+    "mdd": 22.974,
+    "sharpe": 1.091,
+    "calmar": 0.871,
+    "trades": 276,
+    "total_ret": 609.474,
+    "final": 21284222.668,
+    "years": 10.738,
+    "name": "A·最大夏普 TOP3"
+  },
+  {
+    "ann": 13.493,
+    "mdd": 17.071,
+    "sharpe": 1.1,
+    "calmar": 0.79,
+    "trades": 971,
+    "total_ret": 289.279,
+    "final": 11678360.674,
+    "years": 10.738,
+    "name": "B·RP(1/vol) 全5"
+  },
+  {
+    "ann": 12.139,
+    "mdd": 21.655,
+    "sharpe": 0.945,
+    "calmar": 0.561,
+    "trades": 907,
+    "total_ret": 242.179,
+    "final": 10265377.405,
+    "years": 10.738,
+    "name": "B·ERC 全5"
+  },
+  {
+    "ann": 10.94,
+    "mdd": 13.284,
+    "sharpe": 1.114,
+    "calmar": 0.824,
+    "trades": 674,
+    "total_ret": 204.883,
+    "final": 9146482.448,
+    "years": 10.738,
+    "name": "B·最小方差 全5"
+  },
+  {
+    "ann": 8.504,
+    "mdd": 20.214,
+    "sharpe": 0.723,
+    "calmar": 0.421,
+    "trades": 510,
+    "total_ret": 140.228,
+    "final": 7206829.745,
+    "years": 10.738,
+    "name": "B·最大夏普 全5"
+  },
+  {
+    "ann": 12.534,
+    "mdd": 17.679,
+    "sharpe": 1.015,
+    "calmar": 0.709,
+    "trades": 957,
+    "total_ret": 255.345,
+    "final": 10660356.744,
+    "years": 10.738,
+    "name": "B·RP(1/vol) 全5 W120"
+  },
+  {
+    "ann": 10.96,
+    "mdd": 15.33,
+    "sharpe": 1.091,
+    "calmar": 0.715,
+    "trades": 667,
+    "total_ret": 205.482,
+    "final": 9164464.25,
+    "years": 10.738,
+    "name": "B·最小方差 全5 W120"
+  },
+  {
+    "ann": 10.35,
+    "mdd": 18.904,
+    "sharpe": 0.806,
+    "calmar": 0.547,
+    "trades": 497,
+    "total_ret": 187.912,
+    "final": 8637357.442,
+    "years": 10.738,
+    "name": "B·最大夏普 全5 W120"
+  }
+]

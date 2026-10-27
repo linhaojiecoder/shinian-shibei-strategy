@@ -1,0 +1,49 @@
+{
+  "_说明": "5只ETF除权事件表。来源均为权威公告（基金公司官网/交易所/中国证券网），核实日期 2026-10-27。type 字段：cash_dividend=现金分红（每份派息，元）；split=份额拆分（比例=1拆N，N为split_ratio）。split_ratio>1 表示拆分（份额增加、价格下降）。",
+  "_不确定性声明": "创业板159915的除权历史未逐笔核实（通常无分红无折算，但未100%确认）。沪深300分红明细来自华泰柏瑞官网分红记录表，共13笔，覆盖2014-2026。纳指标普的份额拆分来自基金公司公告，确定。黄金518880的份额折算发生在2013-07-24（回测起点2014之前），不影响回测。",
+  "510300": {
+    "name": "沪深300ETF",
+    "events": [
+      {"date": "2014-01-21", "type": "cash_dividend", "amount_per_share": 0.048},
+      {"date": "2015-01-20", "type": "cash_dividend", "amount_per_share": 0.035},
+      {"date": "2016-01-20", "type": "cash_dividend", "amount_per_share": 0.051},
+      {"date": "2017-01-23", "type": "cash_dividend", "amount_per_share": 0.055},
+      {"date": "2018-01-23", "type": "cash_dividend", "amount_per_share": 0.046},
+      {"date": "2019-01-16", "type": "cash_dividend", "amount_per_share": 0.059},
+      {"date": "2019-12-11", "type": "cash_dividend", "amount_per_share": 0.062},
+      {"date": "2021-01-18", "type": "cash_dividend", "amount_per_share": 0.072},
+      {"date": "2022-01-19", "type": "cash_dividend", "amount_per_share": 0.075},
+      {"date": "2023-01-16", "type": "cash_dividend", "amount_per_share": 0.064},
+      {"date": "2024-01-18", "type": "cash_dividend", "amount_per_share": 0.069},
+      {"date": "2025-06-18", "type": "cash_dividend", "amount_per_share": 0.088},
+      {"date": "2026-01-19", "type": "cash_dividend", "amount_per_share": 0.123}
+    ],
+    "source": "华泰柏瑞基金官网分红记录 + 中国证券网"
+  },
+  "159915": {
+    "name": "创业板ETF",
+    "events": [],
+    "source": "未逐笔核实，通常无分红无折算（待确认）"
+  },
+  "513100": {
+    "name": "纳指ETF",
+    "events": [
+      {"date": "2022-01-13", "type": "split", "split_ratio": 5, "register_date": "2022-01-12"}
+    ],
+    "source": "国泰基金份额拆分公告（中国证券报 2022-01-14）"
+  },
+  "513500": {
+    "name": "标普500ETF",
+    "events": [
+      {"date": "2022-03-29", "type": "split", "split_ratio": 2, "register_date": "2022-03-28"}
+    ],
+    "source": "博时基金份额拆分公告（上海证券报 2022-03-30）+ 天天基金（无现金分红记录）"
+  },
+  "518880": {
+    "name": "黄金ETF",
+    "events": [
+      {"date": "2013-07-24", "type": "split", "split_ratio": 0.3776, "note": "上市前折算，回测起点2014之前，不影响"}
+    ],
+    "source": "华安基金官网"
+  }
+}

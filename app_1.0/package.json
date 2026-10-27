@@ -1,0 +1,31 @@
+{
+  "name": "shinian-shibei-strategy",
+  "version": "3.3.2",
+  "description": "十二年十倍复利策略 · 慢慢变富 桌面应用",
+  "main": "main.js",
+  "author": "linhaojie",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.linhaojie.momentum",
+    "productName": "十二年十倍复利策略",
+    "files": [
+      "main.js",
+      "src/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.finance",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.15.3"
+  }
+}

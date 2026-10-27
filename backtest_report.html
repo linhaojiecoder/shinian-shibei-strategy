@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多资产动量轮动 · 深度优化报告</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  :root {
+    --bg: #f7f8fa; --card: #fff; --text: #1a1a1a; --sub: #666;
+    --red: #d43a3a; --green: #1a9c6c; --line: #e5e7eb; --accent: #2b5cff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 24px; }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .subtitle { color: var(--sub); font-size: 13px; margin-bottom: 24px; }
+  .verdict { background: linear-gradient(135deg,#eff6ff,#f0f7ff); border:1px solid #bfdbfe; border-radius:12px; padding:18px 20px; margin-bottom:20px; font-size:14px; }
+  .verdict b { color:#1d4ed8; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:20px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+  .card h2 { font-size:17px; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--line); }
+  .chart { width:100%; height:400px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th,td { padding:9px 10px; text-align:right; border-bottom:1px solid var(--line); }
+  th:first-child,td:first-child { text-align:left; }
+  th { background:#fafafa; color:var(--sub); font-weight:600; }
+  .up { color:var(--red); font-weight:600; }
+  .down { color:var(--green); font-weight:600; }
+  .hl { background:#f0fdf4; }
+  .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; margin-left:6px; }
+  .tag-best { background:#dcfce7; color:#166534; }
+  .warn { background:#fef2f2; border-left:3px solid #dc2626; padding:12px 16px; border-radius:8px; font-size:13px; margin-top:12px; }
+  .warn b { color:#dc2626; }
+  .good { background:#f0fdf4; border-left:3px solid #16a34a; padding:12px 16px; border-radius:8px; font-size:13px; margin-top:12px; }
+  .good b { color:#16a34a; }
+  .note { font-size:12px; color:var(--sub); margin-top:12px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+  .metric { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; text-align:center; }
+  .metric .val { font-size:26px; font-weight:700; color:var(--accent); }
+  .metric .lbl { font-size:12px; color:var(--sub); margin-top:4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>多资产动量轮动 · 深度优化报告</h1>
+  <div class="subtitle">标的：沪深300(510300) / 创业板(159915) / 纳指(513100) / 黄金(518880) ｜ 区间：2021-01-04 ~ 2026-10-19 ｜ 真实日线数据</div>
+
+  <div class="verdict">
+    <b>深度发散结论：</b>系统测试了 6 类优化思路，最优解是「<b>跌破20日线清仓 + 高波动标的剔除</b>」，年化 <b>40.7%</b>、回撤 <b>-7.6%</b>、夏普 <b>2.49</b>。但必须诚实警告：这个结果<b>高度依赖低交易成本</b>，单边成本超过 0.3% 就会崩盘，是"低成本高频"的产物，实盘会打折。
+  </div>
+
+  <div class="grid3">
+    <div class="metric"><div class="val">40.7%</div><div class="lbl">最优方案年化</div></div>
+    <div class="metric"><div class="val" style="color:var(--green);">-7.6%</div><div class="lbl">最优方案回撤</div></div>
+    <div class="metric"><div class="val">2.49</div><div class="lbl">夏普比率</div></div>
+  </div>
+
+  <div class="card">
+    <h2>三个版本对比：全仓1个 → 前3名 → 最优</h2>
+    <div class="chart" id="finalChart"></div>
+    <div class="note">蓝线=最优方案（跌破MA20清仓+波动过滤），曲线最平滑、回撤最小。</div>
+  </div>
+
+  <div class="card">
+    <h2>深度发散的 6 类思路测试结果</h2>
+    <table>
+      <tr><th>优化思路</th><th>年化</th><th>回撤</th><th>夏普</th><th>结论</th></tr>
+      <tr><td>0. 基准（前3名）</td><td class="up">25.4%</td><td class="down">-14.7%</td><td>1.36</td><td>起点</td></tr>
+      <tr><td>1. 风险调整动量（收益/波动率）</td><td class="up">26.1%</td><td class="down">-14.7%</td><td>1.40</td><td>略提升夏普，回撤没降</td></tr>
+      <tr><td>2. 波动率过滤（剔高波动标的）</td><td class="up">26.5%</td><td class="down">-12.1%</td><td>1.73</td><td>有效，回撤降到-12%</td></tr>
+      <tr><td>3. 持仓波动率止损</td><td class="up">27.5%</td><td class="down">-12.2%</td><td>1.62</td><td>有效，但增加换手</td></tr>
+      <tr><td>4. 提升买入门槛</td><td class="down">13.9%</td><td class="down">-21.4%</td><td>0.82</td><td>反而变差，弃用</td></tr>
+      <tr><td>5. 跌破MA20清仓 + 风险动量</td><td class="up">42.7%</td><td class="down">-16.8%</td><td>2.12</td><td>收益大涨，回撤没降</td></tr>
+      <tr class="hl"><td>6. 跌破MA20清仓 + 波动过滤 <span class="tag tag-best">最优</span></td><td class="up">40.7%</td><td class="down">-7.6%</td><td>2.49</td><td>收益+回撤双优</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>最优方案：分年度表现（稳健性验证）</h2>
+    <table>
+      <tr><th>年度</th><th>收益</th><th>当年最大回撤</th></tr>
+      <tr><td>2021</td><td class="up">+16.1%</td><td class="down">-5.8%</td></tr>
+      <tr><td>2022</td><td class="up">+23.5%</td><td class="down">-7.5%</td></tr>
+      <tr><td>2023</td><td class="up">+37.4%</td><td class="down">-3.4%</td></tr>
+      <tr><td>2024</td><td class="up">+37.3%</td><td class="down">-5.3%</td></tr>
+      <tr><td>2025</td><td class="up">+80.3%</td><td class="down">-7.5%</td></tr>
+      <tr><td>2026（至10月）</td><td class="up">+33.0%</td><td class="down">-7.6%</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>参数稳健性检验（轻微改参数，结果是否崩塌）</h2>
+    <table>
+      <tr><th>扰动参数</th><th>年化范围</th><th>回撤范围</th><th>判定</th></tr>
+      <tr><td>动量窗口 10~40日</td><td>33.6%~47.0%</td><td>-7.6%~-9.9%</td><td class="down">稳健</td></tr>
+      <tr><td>调仓周期 3~10日</td><td>37.5%~46.3%</td><td>-7.6%~-10.3%</td><td class="down">稳健</td></tr>
+      <tr><td>持有数 2~4名</td><td>36.9%~46.6%</td><td>-7.6%~-7.9%</td><td class="down">稳健</td></tr>
+      <tr><td>止损均线 15~40日</td><td>38.0%~47.9%</td><td>-7.6%~-9.7%</td><td class="down">稳健</td></tr>
+      <tr><td>波动阈值 1.5%~2.5%</td><td>39.9%~42.7%</td><td>-7.6%~-9.4%</td><td class="down">稳健</td></tr>
+    </table>
+    <div class="good"><b>好消息：</b>参数稳健，不是"动一下就崩"的过拟合。说明「跌破趋势线止损 + 剔除高波动」这个逻辑本身是真实有效的，抓住了 A 股"牛短熊长、跌起来快"的特性。</div>
+  </div>
+
+  <div class="card">
+    <h2>致命弱点：交易成本敏感性</h2>
+    <table>
+      <tr><th>单边成本</th><th>年化</th><th>回撤</th></tr>
+      <tr><td>0.03%（机构级）</td><td class="up">47.4%</td><td class="down">-7.5%</td></tr>
+      <tr><td>0.08%（散户ETF，万1佣金）</td><td class="up">40.7%</td><td class="down">-7.6%</td></tr>
+      <tr><td>0.15%</td><td class="up">31.9%</td><td class="down">-8.6%</td></tr>
+      <tr><td class="down">0.30%</td><td class="down">14.7%</td><td class="down">-13.3%</td></tr>
+      <tr><td class="down">0.50%</td><td class="down">-4.8%</td><td class="down">-42.1%</td></tr>
+    </table>
+    <div class="warn"><b>致命伤：</b>这个策略一年换手 335 次，收益全靠"频繁进出躲跌"赚出来。一旦单边成本超过 0.3%（滑点+跨境ETF溢价波动很容易到这个数），收益从 40% 掉到 15% 甚至转负。它是"低成本高频"的产物，散户实盘很难复现回测数字。</div>
+  </div>
+
+  <div class="card">
+    <h2>最终三个可选方案（按你的风险偏好选）</h2>
+    <table>
+      <tr><th>方案</th><th>年化</th><th>回撤</th><th>换手</th><th>适合谁</th></tr>
+      <tr><td>前3名（简单，易执行）</td><td class="up">25.6%</td><td class="down">-14.7%</td><td>低频</td><td>省心、能扛-15%回撤</td></tr>
+      <tr><td>前3名+跌破MA20清仓</td><td class="up">43.3%</td><td class="down">-16.8%</td><td>中频</td><td>要收益、勤快盯盘</td></tr>
+      <tr class="hl"><td>前3名+MA20止损+波动过滤</td><td class="up">40.7%</td><td class="down">-7.6%</td><td>高频</td><td>要低回撤，但必须成本够低</td></tr>
+    </table>
+  </div>
+
+  <div class="warn">
+    <b>最终实话：</b>你想要的"回撤小 + 收益高"确实被逼近了——-7.6% 回撤 + 40% 年化，回测里看起来很美。但请记住：① 这是 5 年纳指+黄金牛市的特定行情；② 换手 335 次意味着实盘交易成本会吃掉一大块；③ -7.6% 回撤在极端行情（比如股债双杀、纳指腰斩）下会放大。别把回测数字当承诺，当成"这个方向值得一试"即可。
+  </div>
+
+  <div class="note" style="text-align:center;">
+    数据来源：腾讯自选股接口（westock CLI）日线收盘价 ｜ 回测含交易成本、未复权价格、美股QDII溢价与汇率影响 ｜ 所有数字为历史回测，不构成投资建议
+  </div>
+</div>
+
+<script src="./backtest_data/final_chart.js"></script>
+<script>
+(function(){
+  var D = window.FINAL_DATA;
+  var chart = echarts.init(document.getElementById('finalChart'));
+  chart.setOption({
+    backgroundColor:'transparent',
+    tooltip:{trigger:'axis'},
+    legend:{data:['全仓1个','前3名','最优(MA20止损+波动过滤)'],top:0},
+    grid:{left:50,right:20,top:40,bottom:40},
+    xAxis:{type:'category',data:D.dates,boundaryGap:false},
+    yAxis:{type:'value',name:'净值(倍)',scale:true},
+    series:[
+      {name:'全仓1个',type:'line',data:D.k1,smooth:true,lineStyle:{width:1.5,color:'#d43a3a'},symbol:'none'},
+      {name:'前3名',type:'line',data:D.k3,smooth:true,lineStyle:{width:1.5,color:'#94a3b8'},symbol:'none'},
+      {name:'最优(MA20止损+波动过滤)',type:'line',data:D.best,smooth:true,lineStyle:{width:2.5,color:'#2b5cff'},symbol:'none',areaStyle:{color:'rgba(43,92,255,0.08)'}}
+    ]
+  });
+  window.addEventListener('resize',function(){chart.resize();});
+})();
+</script>
+</body>
+</html>

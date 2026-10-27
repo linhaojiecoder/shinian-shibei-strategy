@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多资产动量轮动 · 实操卡</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:#f0f1f3; color:#1a1a1a; padding:20px; }
+  .card { max-width:800px; margin:0 auto; background:#fff; border-radius:16px; box-shadow:0 4px 16px rgba(0,0,0,0.08); overflow:hidden; }
+  .header { background:linear-gradient(135deg,#c0392b,#8e2b1f); color:#fff; padding:24px 28px; }
+  .header h1 { font-size:22px; margin-bottom:4px; }
+  .header .sub { font-size:13px; opacity:0.85; }
+  .body { padding:28px; }
+  .section { margin-bottom:26px; }
+  .section h2 { font-size:16px; margin-bottom:12px; padding-left:10px; border-left:4px solid #c0392b; line-height:1.2; }
+  .grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+  .asset { background:#f7f8fa; border:1px solid #eee; border-radius:8px; padding:10px; text-align:center; }
+  .asset .code { font-weight:700; font-size:14px; }
+  .asset .name { font-size:12px; color:#666; margin-top:2px; }
+  .rule { background:#fdf7f5; border-left:3px solid #c0392b; padding:12px 16px; border-radius:6px; margin-bottom:10px; }
+  .rule b { color:#c0392b; }
+  .signal-box { background:#f0f7f1; border:1px solid #cde8d4; border-radius:10px; padding:16px; text-align:center; margin-bottom:16px; }
+  .signal-box .big { font-size:24px; font-weight:700; color:#0a7a3d; margin:6px 0; }
+  .signal-box .date { font-size:12px; color:#888; }
+  table { width:100%; border-collapse:collapse; font-size:13px; margin-bottom:16px; }
+  th,td { padding:8px 10px; text-align:center; border-bottom:1px solid #eee; }
+  th { background:#fafafa; color:#555; font-weight:600; }
+  .ok { color:#0a7a3d; font-weight:700; }
+  .no { color:#c0392b; }
+  .warn { background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:14px 16px; font-size:13px; line-height:1.7; }
+  .warn b { color:#b7791f; }
+  .checklist { list-style:none; }
+  .checklist li { padding:6px 0 6px 24px; position:relative; font-size:14px; border-bottom:1px dashed #eee; }
+  .checklist li:before { content:"□"; position:absolute; left:0; color:#c0392b; font-weight:700; }
+  .footer { text-align:center; color:#999; font-size:11px; padding:16px; background:#fafafa; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>多资产动量轮动 · 实操卡</h1>
+    <div class="sub">趋势跟随策略 ｜ 每周五收盘后 5 分钟操作</div>
+  </div>
+
+  <div class="body">
+    <!-- 标的池 -->
+    <div class="section">
+      <h2>一、标的池（5 个 ETF，固定）</h2>
+      <div class="grid">
+        <div class="asset"><div class="code">510300</div><div class="name">沪深300</div></div>
+        <div class="asset"><div class="code">159915</div><div class="name">创业板</div></div>
+        <div class="asset"><div class="code">513100</div><div class="name">纳指</div></div>
+        <div class="asset"><div class="code">513500</div><div class="name">标普500</div></div>
+        <div class="asset"><div class="code">518880</div><div class="name">黄金</div></div>
+      </div>
+    </div>
+
+    <!-- 规则 -->
+    <div class="section">
+      <h2>二、买卖规则（含波动过滤）</h2>
+      <div class="rule"><b>① 买什么：</b>每周五算 5 个 ETF 的「20 日涨幅」，取涨幅最高的 <b>前 3 名</b></div>
+      <div class="rule"><b>② 过三关：</b>前 3 名里，<b>同时满足</b>「涨幅 > 0」「站上 20 日线（收盘价 > MA20）」「20 日波动率 ≤ 2%」的，有几个买几个，等权分配</div>
+      <div class="rule"><b>③ 怎么卖：</b>持仓跌破 20 日线，<b>当天清仓</b>（每天收盘后检查）；前 3 名全不合格，<b>空仓放货基</b></div>
+      <div class="rule" style="background:#f0f7f1;border-left-color:#0a7a3d;"><b>波动率怎么算：</b>最近 20 个交易日每天涨跌幅的「标准差」。软件里可用布林带宽度或标准差指标近似，>2% 说明最近涨跌太猛，剔除不碰。</div>
+    </div>
+
+    <!-- 今日信号 -->
+    <div class="section">
+      <h2>三、本周信号（2026-10-19 周一收盘）</h2>
+      <div class="signal-box">
+        <div class="date">当前应持有</div>
+        <div class="big">纳指 ETF（513100）· 满仓</div>
+        <div class="date">上周五同为纳指，无需调仓，继续持有</div>
+      </div>
+      <table>
+        <tr><th>标的</th><th>收盘价</th><th>20日涨幅</th><th>20日波动率</th><th>站上MA20</th><th>判定</th></tr>
+        <tr><td>纳指</td><td>2.345</td><td class="ok">+6.54%</td><td class="ok">1.17%</td><td class="ok">✓</td><td class="ok">持有</td></tr>
+        <tr><td>标普500</td><td>2.677</td><td>+0.60%</td><td>0.93%</td><td class="no">✗跌破</td><td class="no">剔除</td></tr>
+        <tr><td>黄金</td><td>8.553</td><td class="no">-4.36%</td><td>1.10%</td><td class="no">✗跌破</td><td class="no">剔除</td></tr>
+        <tr><td>沪深300</td><td>4.240</td><td class="no">-7.40%</td><td>0.77%</td><td class="no">✗跌破</td><td class="no">剔除</td></tr>
+        <tr><td>创业板</td><td>2.762</td><td class="no">-17.33%</td><td>1.70%</td><td class="no">✗跌破</td><td class="no">剔除</td></tr>
+      </table>
+      <div style="font-size:13px;color:#555;">100 万示范：纳指 2.345 元/份，买约 <b>426,400 份</b>（¥999,908），剩现金 ¥92</div>
+    </div>
+
+    <!-- 纪律 -->
+    <div class="section">
+      <h2>四、纪律（比规则更重要）</h2>
+      <ul class="checklist">
+        <li>每周只看一次，平时不动（除跌破20日线清仓）</li>
+        <li>跌破 20 日线就卖，不找理由、不幻想反弹</li>
+        <li>不预测、只跟随，信号说持有就持有</li>
+        <li>空仓不难受，空仓也是策略的一部分</li>
+        <li>不加杠杆、不借钱</li>
+      </ul>
+    </div>
+
+    <!-- 风险提示 -->
+    <div class="warn">
+      <b>必须知道的真相：</b>这个策略（含波动过滤）回测年化约 <b>55%</b>、最大回撤约 <b>-8%</b>、夏普 3.14。但它是 <b>263 次换手</b>堆出来的，极度依赖低交易成本——单边成本超 0.3%，年化从 55% 掉到 30%。且 5 年美股+黄金牛市是地基，换行情会变。<b>实盘年化请按 20-30% 预期、回撤按 -10~-15% 准备</b>，别把回测当保底。先用亏得起的钱试跑 3 个月，扛得住再加仓。
+    </div>
+  </div>
+
+  <div class="footer">数据源：真实日线（2021-2026）｜ 仅供个人参考，不构成投资建议</div>
+</div>
+</body>
+</html>

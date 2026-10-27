@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026年策略持仓与净值曲线</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:#f5f6f8; color:#1a1a1a; padding:24px; }
+  .wrap { max-width:1000px; margin:0 auto; }
+  h1 { font-size:22px; margin-bottom:6px; }
+  .sub { color:#666; font-size:13px; margin-bottom:20px; }
+  .cards { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+  .card { flex:1; min-width:160px; background:#fff; border-radius:12px; padding:16px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .card .label { font-size:12px; color:#888; margin-bottom:6px; }
+  .card .val { font-size:26px; font-weight:700; }
+  .up { color:#d92b2b; } .down { color:#0a9e4e; }
+  .panel { background:#fff; border-radius:12px; padding:20px; margin-bottom:20px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .panel h2 { font-size:16px; margin-bottom:12px; }
+  #chart { width:100%; height:420px; }
+  #holdChart { width:100%; height:340px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th,td { padding:8px 10px; text-align:left; border-bottom:1px solid #eee; }
+  th { background:#fafafa; color:#555; font-weight:600; }
+  .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:12px; margin-right:4px; }
+  .t-沪深300 { background:#e8f0fe; color:#1a56db; }
+  .t-创业板 { background:#fce8e8; color:#c81e1e; }
+  .t-纳指 { background:#e8f8ef; color:#0a7a3d; }
+  .t-标普500 { background:#eef2ff; color:#4f46e5; }
+  .t-黄金 { background:#fdf3e0; color:#b7791f; }
+  .cash { color:#999; font-style:italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>多资产动量轮动策略 · 2026年回放</h1>
+  <div class="sub">标的：沪深300 / 创业板 / 纳指 / 标普500 / 黄金 ｜ 规则：20日涨幅前3名 + 站上20日线买入，跌破清仓</div>
+
+  <div class="cards">
+    <div class="card"><div class="label">2026年至今收益</div><div class="val up">+51.9%</div></div>
+    <div class="card"><div class="label">起始净值(1/1)</div><div class="val">7.208</div></div>
+    <div class="card"><div class="label">最新净值(10/19)</div><div class="val">10.948</div></div>
+    <div class="card"><div class="label">持仓切换次数</div><div class="val">44次</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>净值曲线（2026-01 至 2026-10）</h2>
+    <div id="chart"></div>
+  </div>
+
+  <div class="panel">
+    <h2>持仓热力（每天持有哪些标的）</h2>
+    <div id="holdChart"></div>
+  </div>
+
+  <div class="panel">
+    <h2>持仓切换完整记录（44次）</h2>
+    <table id="holdTable">
+      <thead><tr><th>日期</th><th>持仓</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="backtest_data/nav_2026.js"></script>
+<script>
+const D = window.DATA2026;
+const dates = D.dates, nav = D.nav, holds = D.holds;
+
+// 净值曲线
+const chart = echarts.init(document.getElementById('chart'));
+chart.setOption({
+  grid:{left:50,right:20,top:20,bottom:40},
+  tooltip:{trigger:'axis'},
+  xAxis:{type:'category',data:dates,boundaryGap:false},
+  yAxis:{type:'value',scale:true,splitLine:{lineStyle:{color:'#eee'}}},
+  series:[{
+    name:'净值',type:'line',data:nav,smooth:true,
+    lineStyle:{color:'#d92b2b',width:2},
+    areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(217,43,43,0.15)'},{offset:1,color:'rgba(217,43,43,0)'}])},
+    symbol:'none'
+  }]
+});
+
+// 持仓热力
+const colors = {'沪深300':'#1a56db','创业板':'#c81e1e','纳指':'#0a7a3d','标普500':'#4f46e5','黄金':'#b7791f'};
+const names = ['沪深300','创业板','纳指','标普500','黄金'];
+const holdChart = echarts.init(document.getElementById('holdChart'));
+// 构建每个标的每日是否持有的序列 (1=持有 0=不持有)
+const holdSeries = names.map(nm => ({
+  name: nm,
+  type: 'heatmap' // 用折线面积更直观，改用step图
+}));
+// 用 step 面积图表示持仓区间
+const seriesData = names.map(nm => {
+  const data = holds.map(h => h[1].includes(nm) ? 1 : 0);
+  return { name:nm, type:'line', step:'end', data, symbol:'none', lineStyle:{width:0}, areaStyle:{color:colors[nm], opacity:0.55}, stack:null };
+});
+holdChart.setOption({
+  grid:{left:50,right:20,top:10,bottom:30},
+  tooltip:{trigger:'axis'},
+  xAxis:{type:'category',data:dates,boundaryGap:false,axisLabel:{show:false}},
+  yAxis:{type:'value',min:0,max:names.length+0.5,axisLabel:{show:false},splitLine:{show:false}},
+  series: seriesData.map((s,idx)=>({...s, yAxisIndex:0, data:s.data.map((v,i)=> v===1 ? idx+1 : null)}))
+});
+
+// 更清晰的持仓可视化：改用堆积的横向色条
+const holdChart2 = echarts.init(document.getElementById('holdChart'));
+holdChart2.dispose();
+// 重新用自定义：每个标的画一条 step 线，值=序号
+const hc = echarts.init(document.getElementById('holdChart'));
+const segSeries = names.map((nm, idx) => ({
+  name: nm,
+  type: 'line',
+  step: 'end',
+  data: holds.map(h => h[1].includes(nm) ? idx+1 : null),
+  symbol: 'none',
+  lineStyle: { color: colors[nm], width: 14, opacity: 0.85 },
+  areaStyle: { opacity: 0 },
+}));
+hc.setOption({
+  grid:{left:50,right:20,top:20,bottom:40},
+  tooltip:{trigger:'axis'},
+  xAxis:{type:'category',data:dates,boundaryGap:false},
+  yAxis:{type:'value',min:0.5,max:5.5,interval:1,axisLabel:{formatter:v=>names[v-1]||''}},
+  series: segSeries
+});
+
+// 持仓切换表格
+const tbody = document.getElementById('holdTable').querySelector('tbody');
+let prev = null;
+holds.forEach(([d, hs]) => {
+  const key = hs.join('+');
+  if (key !== prev) {
+    const tr = document.createElement('tr');
+    const td1 = document.createElement('td'); td1.textContent = d;
+    const td2 = document.createElement('td');
+    if (hs.length === 0) {
+      td2.innerHTML = '<span class="cash">空仓</span>';
+    } else {
+      hs.forEach(nm => {
+        const sp = document.createElement('span');
+        sp.className = 'tag t-' + nm; sp.textContent = nm;
+        td2.appendChild(sp);
+      });
+    }
+    tr.appendChild(td1); tr.appendChild(td2);
+    tbody.appendChild(tr);
+    prev = key;
+  }
+});
+</script>
+</body>
+</html>

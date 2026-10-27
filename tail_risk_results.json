@@ -1,0 +1,510 @@
+{
+  "results": [
+    {
+      "ann": 20.72,
+      "mdd": 17.01,
+      "sharpe": 1.13,
+      "calmar": 1.219,
+      "trades": 402,
+      "years": 10.74,
+      "name": "基线(无止损·双周·20日·TOP2)",
+      "cfg": {}
+    },
+    {
+      "ann": -3.54,
+      "mdd": 39.93,
+      "sharpe": -0.31,
+      "calmar": -0.089,
+      "trades": 3020,
+      "years": 10.74,
+      "name": "回撤止损 8% → 篮子站上MA20",
+      "cfg": {
+        "dd_stop": 0.08,
+        "reentry_ma": 20
+      }
+    },
+    {
+      "ann": -5.04,
+      "mdd": 51.05,
+      "sharpe": -0.44,
+      "calmar": -0.099,
+      "trades": 3180,
+      "years": 10.74,
+      "name": "回撤止损 8% → 篮子站上MA60",
+      "cfg": {
+        "dd_stop": 0.08,
+        "reentry_ma": 60
+      }
+    },
+    {
+      "ann": -3.21,
+      "mdd": 37.7,
+      "sharpe": -0.27,
+      "calmar": -0.085,
+      "trades": 3013,
+      "years": 10.74,
+      "name": "回撤止损 10% → 篮子站上MA20",
+      "cfg": {
+        "dd_stop": 0.1,
+        "reentry_ma": 20
+      }
+    },
+    {
+      "ann": -6.2,
+      "mdd": 57.1,
+      "sharpe": -0.56,
+      "calmar": -0.109,
+      "trades": 3205,
+      "years": 10.74,
+      "name": "回撤止损 10% → 篮子站上MA60",
+      "cfg": {
+        "dd_stop": 0.1,
+        "reentry_ma": 60
+      }
+    },
+    {
+      "ann": -2.56,
+      "mdd": 35.21,
+      "sharpe": -0.2,
+      "calmar": -0.073,
+      "trades": 2925,
+      "years": 10.74,
+      "name": "回撤止损 12% → 篮子站上MA20",
+      "cfg": {
+        "dd_stop": 0.12,
+        "reentry_ma": 20
+      }
+    },
+    {
+      "ann": -2.86,
+      "mdd": 47.87,
+      "sharpe": -0.19,
+      "calmar": -0.06,
+      "trades": 2642,
+      "years": 10.74,
+      "name": "回撤止损 12% → 篮子站上MA60",
+      "cfg": {
+        "dd_stop": 0.12,
+        "reentry_ma": 60
+      }
+    },
+    {
+      "ann": 17.15,
+      "mdd": 13.22,
+      "sharpe": 1.23,
+      "calmar": 1.297,
+      "trades": 765,
+      "years": 10.74,
+      "name": "波动率目标 10%",
+      "cfg": {
+        "vol_target": 0.1
+      }
+    },
+    {
+      "ann": 18.3,
+      "mdd": 13.89,
+      "sharpe": 1.2,
+      "calmar": 1.318,
+      "trades": 650,
+      "years": 10.74,
+      "name": "波动率目标 12%",
+      "cfg": {
+        "vol_target": 0.12
+      }
+    },
+    {
+      "ann": 18.5,
+      "mdd": 13.89,
+      "sharpe": 1.17,
+      "calmar": 1.332,
+      "trades": 628,
+      "years": 10.74,
+      "name": "波动率目标 13%",
+      "cfg": {
+        "vol_target": 0.13
+      }
+    },
+    {
+      "ann": 18.78,
+      "mdd": 14.38,
+      "sharpe": 1.16,
+      "calmar": 1.306,
+      "trades": 603,
+      "years": 10.74,
+      "name": "波动率目标 14%",
+      "cfg": {
+        "vol_target": 0.14
+      }
+    },
+    {
+      "ann": 19.09,
+      "mdd": 14.83,
+      "sharpe": 1.15,
+      "calmar": 1.287,
+      "trades": 559,
+      "years": 10.74,
+      "name": "波动率目标 15%",
+      "cfg": {
+        "vol_target": 0.15
+      }
+    },
+    {
+      "ann": 19.39,
+      "mdd": 14.94,
+      "sharpe": 1.15,
+      "calmar": 1.298,
+      "trades": 533,
+      "years": 10.74,
+      "name": "波动率目标 16%",
+      "cfg": {
+        "vol_target": 0.16
+      }
+    },
+    {
+      "ann": 20.07,
+      "mdd": 15.15,
+      "sharpe": 1.15,
+      "calmar": 1.325,
+      "trades": 483,
+      "years": 10.74,
+      "name": "波动率目标 18%",
+      "cfg": {
+        "vol_target": 0.18
+      }
+    },
+    {
+      "ann": 17.75,
+      "mdd": 13.88,
+      "sharpe": 1.19,
+      "calmar": 1.279,
+      "trades": 746,
+      "years": 10.74,
+      "name": "波动率目标 12% 窗口10",
+      "cfg": {
+        "vol_target": 0.12,
+        "vol_win": 10
+      }
+    },
+    {
+      "ann": 17.96,
+      "mdd": 13.89,
+      "sharpe": 1.17,
+      "calmar": 1.293,
+      "trades": 581,
+      "years": 10.74,
+      "name": "波动率目标 12% 窗口40",
+      "cfg": {
+        "vol_target": 0.12,
+        "vol_win": 40
+      }
+    },
+    {
+      "ann": 18.4,
+      "mdd": 15.34,
+      "sharpe": 1.14,
+      "calmar": 1.199,
+      "trades": 623,
+      "years": 10.74,
+      "name": "波动率目标 15% 窗口10",
+      "cfg": {
+        "vol_target": 0.15,
+        "vol_win": 10
+      }
+    },
+    {
+      "ann": 19.46,
+      "mdd": 15.05,
+      "sharpe": 1.16,
+      "calmar": 1.293,
+      "trades": 494,
+      "years": 10.74,
+      "name": "波动率目标 15% 窗口40",
+      "cfg": {
+        "vol_target": 0.15,
+        "vol_win": 40
+      }
+    },
+    {
+      "ann": 9.76,
+      "mdd": 18.23,
+      "sharpe": 0.78,
+      "calmar": 0.535,
+      "trades": 909,
+      "years": 10.74,
+      "name": "分批止损 短MA10/长MA40",
+      "cfg": {
+        "tier": [
+          10,
+          40
+        ]
+      }
+    },
+    {
+      "ann": 12.46,
+      "mdd": 17.06,
+      "sharpe": 0.87,
+      "calmar": 0.73,
+      "trades": 692,
+      "years": 10.74,
+      "name": "分批止损 短MA20/长MA60",
+      "cfg": {
+        "tier": [
+          20,
+          60
+        ]
+      }
+    },
+    {
+      "ann": 13.58,
+      "mdd": 16.28,
+      "sharpe": 0.94,
+      "calmar": 0.834,
+      "trades": 709,
+      "years": 10.74,
+      "name": "分批止损 短MA20/长MA120",
+      "cfg": {
+        "tier": [
+          20,
+          120
+        ]
+      }
+    },
+    {
+      "ann": 21.43,
+      "mdd": 17.01,
+      "sharpe": 1.18,
+      "calmar": 1.26,
+      "trades": 388,
+      "years": 10.74,
+      "name": "趋势入场 站上MA20",
+      "cfg": {
+        "entry_ma": 20
+      }
+    },
+    {
+      "ann": 20.16,
+      "mdd": 20.22,
+      "sharpe": 1.1,
+      "calmar": 0.997,
+      "trades": 384,
+      "years": 10.74,
+      "name": "趋势入场 站上MA60",
+      "cfg": {
+        "entry_ma": 60
+      }
+    },
+    {
+      "ann": 20.05,
+      "mdd": 22.52,
+      "sharpe": 1.09,
+      "calmar": 0.89,
+      "trades": 355,
+      "years": 10.74,
+      "name": "趋势入场 站上MA120",
+      "cfg": {
+        "entry_ma": 120
+      }
+    },
+    {
+      "ann": -2.64,
+      "mdd": 34.13,
+      "sharpe": -0.25,
+      "calmar": -0.077,
+      "trades": 3007,
+      "years": 10.74,
+      "name": "回撤10%+MA20 再入 + 波动目标12%",
+      "cfg": {
+        "dd_stop": 0.1,
+        "reentry_ma": 20,
+        "vol_target": 0.12
+      }
+    },
+    {
+      "ann": -2.43,
+      "mdd": 41.83,
+      "sharpe": -0.18,
+      "calmar": -0.058,
+      "trades": 2786,
+      "years": 10.74,
+      "name": "回撤10%+MA60 再入 + 波动目标12%",
+      "cfg": {
+        "dd_stop": 0.1,
+        "reentry_ma": 60,
+        "vol_target": 0.12
+      }
+    },
+    {
+      "ann": -2.99,
+      "mdd": 34.43,
+      "sharpe": -0.25,
+      "calmar": -0.087,
+      "trades": 2847,
+      "years": 10.74,
+      "name": "回撤10%+MA20 再入 + 趋势入场MA60",
+      "cfg": {
+        "dd_stop": 0.1,
+        "reentry_ma": 20,
+        "entry_ma": 60
+      }
+    },
+    {
+      "ann": 17.97,
+      "mdd": 14.74,
+      "sharpe": 1.15,
+      "calmar": 1.219,
+      "trades": 625,
+      "years": 10.74,
+      "name": "波动目标12% + 趋势入场MA60",
+      "cfg": {
+        "vol_target": 0.12,
+        "entry_ma": 60
+      }
+    },
+    {
+      "ann": -3.58,
+      "mdd": 39.99,
+      "sharpe": -0.31,
+      "calmar": -0.089,
+      "trades": 3032,
+      "years": 10.74,
+      "name": "回撤8%+MA20 + 分批止损20/60",
+      "cfg": {
+        "dd_stop": 0.08,
+        "reentry_ma": 20,
+        "tier": [
+          20,
+          60
+        ]
+      }
+    },
+    {
+      "ann": -2.06,
+      "mdd": 32.44,
+      "sharpe": -0.18,
+      "calmar": -0.064,
+      "trades": 2775,
+      "years": 10.74,
+      "name": "回撤10%+MA20 + 波动目标12% + 趋势MA60",
+      "cfg": {
+        "dd_stop": 0.1,
+        "reentry_ma": 20,
+        "vol_target": 0.12,
+        "entry_ma": 60
+      }
+    },
+    {
+      "ann": 20.25,
+      "mdd": 14.57,
+      "sharpe": 1.22,
+      "calmar": 1.39,
+      "trades": 508,
+      "years": 10.74,
+      "name": "波动目标15% + 趋势入场MA20",
+      "cfg": {
+        "vol_target": 0.15,
+        "entry_ma": 20
+      }
+    },
+    {
+      "ann": 20.72,
+      "mdd": 17.01,
+      "sharpe": 1.13,
+      "calmar": 1.219,
+      "trades": 402,
+      "years": 10.74,
+      "name": "熔断式回撤止损 18% → MA120再入",
+      "cfg": {
+        "dd_stop": 0.18,
+        "reentry_ma": 120
+      }
+    },
+    {
+      "ann": 20.72,
+      "mdd": 17.01,
+      "sharpe": 1.13,
+      "calmar": 1.219,
+      "trades": 402,
+      "years": 10.74,
+      "name": "熔断式回撤止损 25% → MA120再入",
+      "cfg": {
+        "dd_stop": 0.25,
+        "reentry_ma": 120
+      }
+    }
+  ],
+  "good": [
+    {
+      "ann": 20.25,
+      "mdd": 14.57,
+      "sharpe": 1.22,
+      "calmar": 1.39,
+      "trades": 508,
+      "years": 10.74,
+      "name": "波动目标15% + 趋势入场MA20",
+      "cfg": {
+        "vol_target": 0.15,
+        "entry_ma": 20
+      }
+    },
+    {
+      "ann": 18.5,
+      "mdd": 13.89,
+      "sharpe": 1.17,
+      "calmar": 1.332,
+      "trades": 628,
+      "years": 10.74,
+      "name": "波动率目标 13%",
+      "cfg": {
+        "vol_target": 0.13
+      }
+    },
+    {
+      "ann": 18.3,
+      "mdd": 13.89,
+      "sharpe": 1.2,
+      "calmar": 1.318,
+      "trades": 650,
+      "years": 10.74,
+      "name": "波动率目标 12%",
+      "cfg": {
+        "vol_target": 0.12
+      }
+    },
+    {
+      "ann": 18.78,
+      "mdd": 14.38,
+      "sharpe": 1.16,
+      "calmar": 1.306,
+      "trades": 603,
+      "years": 10.74,
+      "name": "波动率目标 14%",
+      "cfg": {
+        "vol_target": 0.14
+      }
+    },
+    {
+      "ann": 19.39,
+      "mdd": 14.94,
+      "sharpe": 1.15,
+      "calmar": 1.298,
+      "trades": 533,
+      "years": 10.74,
+      "name": "波动率目标 16%",
+      "cfg": {
+        "vol_target": 0.16
+      }
+    },
+    {
+      "ann": 19.09,
+      "mdd": 14.83,
+      "sharpe": 1.15,
+      "calmar": 1.287,
+      "trades": 559,
+      "years": 10.74,
+      "name": "波动率目标 15%",
+      "cfg": {
+        "vol_target": 0.15
+      }
+    }
+  ]
+}
