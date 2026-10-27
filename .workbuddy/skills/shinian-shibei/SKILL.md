@@ -67,7 +67,13 @@ cd /Users/linhaojie/WorkBuddy/2026-10-12-21-59-24
 python3 sim_v4.py
 # 3. 导出 App/skill 共用的 data.json
 python3 gen_data_full.py
+# 4. 生成精美 HTML 复盘页面（用户双击浏览器打开，首选交付物）
+python3 gen_report_html.py   # → backtest_data/复盘报告.html
+# 5. 生成 Markdown 复盘
+python3 ~/.workbuddy/skills/shinian-shibei/scripts/gen_review.py
 ```
+
+> **首选交付物是 HTML 报告**（`backtest_data/复盘报告.html`）：深色金融风格、红涨绿跌、净值曲线 + 年度/月度收益柱状图，双击浏览器打开即可，一眼看清。用户明确说不要纯 Markdown（在 Obsidian 里白底黑字不好看）。
 
 运行后核对打印输出的关键指标：累计收益、年化、回撤、夏普、期末总资产。这些值必须与 `obsidian-vault/03-每日沟通日志/` 里上次记录自洽（跨日波动应在合理范围，若出现跳变说明数据口径又出了问题，立即停下排查）。
 
