@@ -376,18 +376,35 @@ function render(){
   document.getElementById('updateTime').textContent = '数据截至 ' + DATA.latest_date;
   document.getElementById('latestDate').textContent = DATA.latest_date;
 
-  // 持仓明细
-  const holds = L.holds_label || {};
-  const holdKeys = Object.keys(holds);
-  if(holdKeys.length === 0){
+  // 持仓明细（精确字段：shares/cost/mv/day_pnl/total_pnl/weight/hold_days）
+  const preciseHolds = L.holdings || {};
+  const priceByName = {};
+  (DATA.signals || []).forEach(s => { priceByName[s.name] = s.price; });
+  const holdNames = Object.keys(preciseHolds);
+  if(holdNames.length === 0){
     document.getElementById('holdingsPanel').innerHTML = `<div class="empty"><span class="circle"></span>当前空仓，资金全部在货币基金</div>`;
   }else{
+    const ud = v => v >= 0 ? 'var(--red)' : 'var(--green)';
+    const sg = v => v < 0 ? '-' : '';
+    const fnum = v => Math.round(v).toLocaleString();
     let rows = '';
-    for(const [name, val] of Object.entries(holds)){
-      const pct = total>0 ? (val/total*100) : 0;
-      rows += `<tr><td><b>${name}</b></td><td class="up">¥${Math.round(val).toLocaleString()}</td><td>${pct.toFixed(1)}%</td></tr>`;
+    for(const name of holdNames){
+      const h = preciseHolds[name];
+      const price = priceByName[name];
+      const pnlPct = (price && h.cost) ? ((price - h.cost) / h.cost * 100) : null;
+      const col = ud(h.total_pnl);
+      const colD = ud(h.day_pnl);
+      rows += `<tr>
+        <td><div class="ths-name" style="color:${col};">${name}</div><div class="ths-num">${fnum(h.mv)}</div></td>
+        <td style="text-align:right;"><div class="ths-num" style="color:${col};">${sg(h.total_pnl)}${fnum(h.total_pnl)}</div><div class="ths-num" style="color:${col};">${pnlPct==null?'—':(pnlPct>=0?'+':'')+pnlPct.toFixed(2)+'%'}</div></td>
+        <td style="text-align:right;"><div class="ths-num">${h.shares.toLocaleString()}</div></td>
+        <td style="text-align:right;"><div class="ths-num" style="color:${col};">${price==null?'—':price}</div><div class="ths-sub">${h.cost.toFixed(4)}</div></td>
+        <td style="text-align:right;"><div class="ths-num" style="color:${colD};">${sg(h.day_pnl)}${fnum(h.day_pnl)}</div></td>
+        <td style="text-align:right;"><div class="ths-num">${h.weight==null?'—':h.weight.toFixed(2)+'%'}</div></td>
+        <td style="text-align:right;"><div class="ths-num">${h.hold_days==null?'—':h.hold_days+' 天'}</div></td>
+      </tr>`;
     }
-    document.getElementById('holdingsPanel').innerHTML = `<table><tr><th>标的</th><th>市值</th><th>占比</th></tr>${rows}</table>`;
+    document.getElementById('holdingsPanel').innerHTML = `<table class="ths-hold"><tr><th>市值</th><th style="text-align:right;">盈亏</th><th style="text-align:right;">持仓</th><th style="text-align:right;">成本 / 现价</th><th style="text-align:right;">当日盈亏</th><th style="text-align:right;">个股仓位</th><th style="text-align:right;">持股天数</th></tr>${rows}</table>`;
   }
 
   // 净值曲线（累计收益率 %，单线）
