@@ -15,6 +15,13 @@ app_1.0/node_modules/
 *.dmg
 *.zip
 
+# 复盘临时产物（每次覆盖，不入库）
+backtest_data/review_latest.json
+backtest_data/review_latest.md
+
+# WorkBuddy 自动化运行时目录
+.workbuddy/memory/automations/
+
 # 编辑器
 .vscode/
 .idea/

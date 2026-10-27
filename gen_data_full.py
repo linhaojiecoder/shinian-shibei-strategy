@@ -48,13 +48,20 @@ for code, name in NAMES:
 passed = sorted([s for s in signals if s["pass"]], key=lambda s: -s["mom"])
 buy_list = [s["name"] for s in passed[:2]]
 
+# 当前实际持仓（从期末精确持仓取 label 列表）
+current_hold_labels = list(latest_holdings.keys())  # 例如 ['标普500ETF', '纳指ETF']
+
 is_friday = datetime.strptime(latest, "%Y-%m-%d").weekday() == 4
+# 今日操作必须区分「是否持有」与「是否触发调仓」，不能说「空仓观望」——策略可能正持有着
 if buy_list:
-    action_type, action_title = "buy", "买入信号"
+    action_type, action_title = "buy", "调仓买入"
     detail = "动量前2：" + "、".join(buy_list) + "，按波动率目标仓位买入，下个调仓日开盘执行"
+elif current_hold_labels:
+    action_type, action_title = "hold", "继续持有"
+    detail = "当前持有：" + "、".join(current_hold_labels) + "。本调仓日未触发新标的，持仓不动"
 else:
     action_type, action_title = "hold", "空仓观望"
-    detail = "五标的均未通过筛选，空仓等待"
+    detail = "当前无持仓，且五标的均未通过筛选，继续空仓等待"
 
 today_action = {
     "date": latest, "is_friday": is_friday, "type": action_type,
