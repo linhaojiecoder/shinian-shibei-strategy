@@ -4,13 +4,37 @@
 双击用浏览器打开即可，颜色跟随 A 股习惯（涨红跌绿）。
 输出：backtest_data/复盘报告.html
 """
-import json, os
+import json, os, datetime
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE, "app_1.0", "src", "data.json")
 OUT = os.path.join(BASE, "backtest_data", "复盘报告.html")
 
 d = json.load(open(DATA))
+
+
+def next_rebalance_date(latest_date, trades):
+    """推算下次调仓「信号日」（双周周五）。
+    规则：最近一次成交日是周一（周五信号日 → 次一交易日周一开盘成交），
+    下一个信号日 = 最近信号日 + 14 天。
+    从 trades 最近一条成交日反推：成交日(周一) - 3 天 = 信号日(周五)。
+    """
+    if not trades:
+        return None
+    last_trade = trades[-1]["date"]
+    last_dt = datetime.datetime.strptime(last_trade, "%Y-%m-%d")
+    # 成交日所在周周五 = 成交日 + (4 - weekday) 天（weekday: 周一=0..周日=6）
+    signal_dt = last_dt + datetime.timedelta(days=(4 - last_dt.weekday()))
+    # 若成交日本身晚于该周五（如成交日就是周五收盘后），信号日应回退上一周五
+    if signal_dt > last_dt:
+        signal_dt = signal_dt - datetime.timedelta(days=7)
+    # 下一个信号日 = 最近信号日 + 14 天
+    nxt = signal_dt + datetime.timedelta(days=14)
+    # 若已过 latest_date，继续 +14 直到未来
+    latest_dt = datetime.datetime.strptime(latest_date, "%Y-%m-%d")
+    while nxt <= latest_dt:
+        nxt = nxt + datetime.timedelta(days=14)
+    return nxt.strftime("%Y-%m-%d")
 
 summary = d["summary"]
 latest = d["latest_state"]
@@ -92,6 +116,14 @@ today_pnl = latest.get("today_pnl", 0)
 asset_change = latest.get("asset_change", 0)
 pos_total_pnl = latest.get("pos_total_pnl", 0)
 
+# 下次调仓信号日（双周周五）与倒计时
+nb_date = next_rebalance_date(d["latest_date"], d.get("trades", []))
+nb_days = None
+if nb_date:
+    nb_dt = datetime.datetime.strptime(nb_date, "%Y-%m-%d")
+    nb_days = (nb_dt.date() - datetime.date.today()).days
+    nb_days = max(0, nb_days)
+
 # 今日总资产变动百分比（相对昨日）
 _prev_total = final_total - asset_change
 if _prev_total and asset_change:
@@ -157,6 +189,17 @@ html = f"""<!DOCTYPE html>
   .hero .big .num.up {{ color:var(--up); }}
   .hero .big .num.down {{ color:var(--down); }}
   .hero .big .note {{ color:var(--muted); font-size:12px; margin-top:4px; }}
+  .next-reb {{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    background:linear-gradient(135deg, rgba(240,185,11,.10), rgba(240,185,11,.02));
+    border:1px solid rgba(240,185,11,.28); border-radius:12px;
+    padding:12px 16px; margin:0 0 var(--gap); font-size:13px;
+  }}
+  .next-reb .nr-icon {{ font-size:16px; }}
+  .next-reb .nr-txt {{ color:var(--text); }}
+  .next-reb .nr-txt b {{ color:var(--accent); }}
+  .next-reb .nr-count {{ color:var(--muted); margin-left:auto; white-space:nowrap; }}
+  .next-reb .nr-count b {{ color:var(--text); }}
   .metrics {{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:var(--gap); margin-bottom:0; }}
   .metrics .m {{
     min-width:0; background:var(--card); border:1px solid var(--border);
@@ -174,6 +217,31 @@ html = f"""<!DOCTYPE html>
   .chart {{ width:100%; height:360px; }}
   .chart-sm {{ width:100%; height:280px; }}
   .table-wrap {{ width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }}
+  /* 移动端卡片式列表（桌面端隐藏，≤640px 显示） */
+  .card-list {{ display:none; }}
+  .hold-card {{
+    background:var(--card2); border:1px solid var(--border); border-radius:12px;
+    padding:14px 16px; margin-bottom:10px;
+  }}
+  .hold-card:last-child {{ margin-bottom:0; }}
+  .hc-head {{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }}
+  .hc-name {{ font-size:15px; font-weight:700; }}
+  .hc-mv {{ font-size:14px; font-weight:700; }}
+  .hc-grid {{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px 14px; }}
+  .hc-item {{ min-width:0; }}
+  .hc-item .k {{ font-size:11px; color:var(--muted); }}
+  .hc-item .v {{ font-size:14px; font-weight:600; margin-top:2px; }}
+  .hc-item .v.sub {{ font-size:12px; font-weight:500; color:var(--muted); }}
+  .sig-card-m {{
+    display:flex; align-items:center; gap:12px;
+    background:var(--card2); border:1px solid var(--border); border-radius:12px;
+    padding:12px 16px; margin-bottom:10px;
+  }}
+  .sig-card-m:last-child {{ margin-bottom:0; }}
+  .scm-name {{ font-size:14px; font-weight:700; flex:1; min-width:0; }}
+  .scm-mom {{ font-size:14px; font-weight:700; }}
+  .scm-vol {{ font-size:12px; color:var(--muted); }}
+
   table {{ width:100%; border-collapse:collapse; font-size:14px; min-width:520px; }}
   th {{ text-align:left; color:var(--muted); font-weight:500; font-size:12px;
        padding:10px 8px; border-bottom:1px solid var(--border); white-space:nowrap; }}
@@ -232,7 +300,13 @@ html = f"""<!DOCTYPE html>
     .action-box {{ flex-direction:column; align-items:flex-start; gap:10px; padding:14px 16px; }}
     .action-box .detail {{ min-width:0; font-size:13px; }}
     .footer {{ margin-top:28px; padding:16px 0 8px; font-size:11px; }}
-    table {{ min-width:460px; }}
+    /* 移动端：表格隐藏，改用卡片式竖排 */
+    .table-wrap {{ display:none; }}
+    .card-list {{ display:block; }}
+    .next-reb {{ align-items:flex-start; flex-direction:column; gap:6px; padding:12px 14px; font-size:12px; }}
+    .next-reb .nr-count {{ margin-left:0; }}
+    .hc-grid {{ gap:8px 10px; }}
+    .hc-item .v {{ font-size:13px; }}
   }}
 </style>
 </head>
@@ -267,6 +341,12 @@ html = f"""<!DOCTYPE html>
     </div>
   </div>
 
+  <div class="next-reb">
+    <span class="nr-icon">🗓</span>
+    <span class="nr-txt">下次调仓：<b>{nb_date}</b>（周五信号，次一交易日开盘执行）</span>
+    <span class="nr-count">距今 <b>{nb_days}</b> 天</span>
+  </div>
+
   <div class="section">
     <div class="h">净值曲线（策略 vs 沪深300）</div>
     <div class="d">2014 年至今，初始净值 1.0</div>
@@ -284,6 +364,7 @@ html = f"""<!DOCTYPE html>
         <tbody id="holdBody"></tbody>
       </table>
     </div>
+    <div class="card-list" id="holdCards"></div>
   </div>
 
   <div class="action-box">
@@ -302,6 +383,7 @@ html = f"""<!DOCTYPE html>
         <tbody id="sigBody"></tbody>
       </table>
     </div>
+    <div class="card-list" id="sigCards"></div>
   </div>
 
   <div class="section">
@@ -350,6 +432,34 @@ sb.innerHTML = P.sig_rows.map(s => `
     <td>${{s.price}}</td>
     <td><span class="tag ${{s.pass?'pass':'no'}}">${{s.pass?'通过':'未通过'}}</span></td>
   </tr>`).join('');
+
+// 移动端卡片：持仓（每标的竖排字段）
+const hc = document.getElementById('holdCards');
+hc.innerHTML = rows.map(r => `
+  <div class="hold-card">
+    <div class="hc-head">
+      <span class="hc-name">${{r.label}}</span>
+      <span class="hc-mv">${{fmtMoney(r.mv)}}</span>
+    </div>
+    <div class="hc-grid">
+      <div class="hc-item"><div class="k">持仓(份)</div><div class="v">${{r.shares.toLocaleString()}}</div></div>
+      <div class="hc-item"><div class="k">成本 / 现价</div><div class="v">${{r.cost.toFixed(4)}} <span class="v sub">/ ${{r.price}}</span></div></div>
+      <div class="hc-item"><div class="k">当日盈亏</div><div class="v ${{cls(r.day_pnl)}}">${{fmtSigned(r.day_pnl)}}</div></div>
+      <div class="hc-item"><div class="k">总盈亏</div><div class="v ${{cls(r.total_pnl)}}">${{fmtSigned(r.total_pnl)}} <span class="v sub">${{fmtPct(r.pnl_pct)}}</span></div></div>
+      <div class="hc-item"><div class="k">个股仓位</div><div class="v">${{r.weight==null?'—':r.weight.toFixed(2)+'%'}}</div></div>
+      <div class="hc-item"><div class="k">持股天数</div><div class="v">${{r.hold_days==null?'—':r.hold_days+'天'}}</div></div>
+    </div>
+  </div>`).join('');
+
+// 移动端卡片：五标的信号
+const sc = document.getElementById('sigCards');
+sc.innerHTML = P.sig_rows.map(s => `
+  <div class="sig-card-m">
+    <span class="scm-name">${{s.name}}</span>
+    <span class="scm-vol">波动 ${{s.vol.toFixed(2)}}%</span>
+    <span class="scm-mom ${{s.mom>=0?'up':'down'}}">${{(s.mom>=0?'+':'') + s.mom.toFixed(2)}}%</span>
+    <span class="tag ${{s.pass?'pass':'no'}}">${{s.pass?'通过':'未通过'}}</span>
+  </div>`).join('');
 
 function lineChart(el, dates, s1, s2, name1, name2) {{
   const c = echarts.init(el);
