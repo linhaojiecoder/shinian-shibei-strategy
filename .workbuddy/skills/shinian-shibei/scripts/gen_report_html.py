@@ -104,55 +104,60 @@ html = f"""<!DOCTYPE html>
     --down: #2dd4a7;
     --accent: #f0b90b;
   }}
-  * {{ margin:0; padding:0; box-sizing:border-box; }}
+  *, *::before, *::after {{ margin:0; padding:0; box-sizing:border-box; }}
+  html, body {{ max-width:100%; overflow-x:hidden; }}
   body {{
     background: var(--bg);
     color: var(--text);
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-    padding: 28px 24px 60px;
+    padding: 24px 20px 60px;
     line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }}
-  .wrap {{ max-width: 1080px; margin: 0 auto; }}
-  .head {{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px; margin-bottom:8px; }}
-  .head .title {{ font-size:24px; font-weight:700; }}
-  .head .sub {{ color:var(--muted); font-size:14px; margin-top:4px; }}
+  .wrap {{ width:100%; max-width:1080px; margin:0 auto; }}
+  .head {{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:14px; margin-bottom:8px; }}
+  .head .title {{ font-size:22px; font-weight:700; letter-spacing:.5px; }}
+  .head .sub {{ color:var(--muted); font-size:13px; margin-top:5px; }}
   .date-badge {{
     background: var(--card2); border:1px solid var(--border);
-    border-radius:10px; padding:10px 16px; font-size:13px; color:var(--muted);
+    border-radius:10px; padding:9px 14px; font-size:12px; color:var(--muted);
+    max-width:100%;
   }}
-  .date-badge b {{ color:var(--text); font-size:15px; }}
+  .date-badge b {{ color:var(--text); font-size:14px; }}
   .hero {{
-    display:flex; flex-wrap:wrap; gap:14px; margin:20px 0;
+    display:grid; grid-template-columns:repeat(3, minmax(0,1fr));
+    gap:14px; margin:18px 0 14px;
   }}
   .hero .big {{
-    flex:1; min-width:220px; background:var(--card);
-    border:1px solid var(--border); border-radius:14px; padding:20px;
+    min-width:0; max-width:100%; overflow:hidden; background:var(--card);
+    border:1px solid var(--border); border-radius:14px; padding:18px 20px;
   }}
-  .hero .big .label {{ color:var(--muted); font-size:13px; margin-bottom:8px; }}
-  .hero .big .num {{ font-size:34px; font-weight:700; }}
+  .hero .big .label {{ color:var(--muted); font-size:12px; margin-bottom:6px; }}
+  .hero .big .num {{ font-size:28px; font-weight:700; line-height:1.15; }}
   .hero .big .num.up {{ color:var(--up); }}
   .hero .big .num.down {{ color:var(--down); }}
-  .hero .big .note {{ color:var(--muted); font-size:12px; margin-top:6px; }}
-  .metrics {{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }}
+  .hero .big .note {{ color:var(--muted); font-size:12px; margin-top:5px; }}
+  .metrics {{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; margin-bottom:18px; }}
   .metrics .m {{
-    background:var(--card); border:1px solid var(--border);
-    border-radius:12px; padding:16px;
+    min-width:0; background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:14px 16px;
   }}
   .metrics .m .label {{ color:var(--muted); font-size:12px; }}
-  .metrics .m .num {{ font-size:22px; font-weight:700; margin-top:4px; }}
-  .section {{ margin:28px 0 16px; }}
-  .section .h {{ font-size:16px; font-weight:700; margin-bottom:4px; }}
+  .metrics .m .num {{ font-size:20px; font-weight:700; margin-top:4px; }}
+  .section {{ margin:26px 0 14px; }}
+  .section .h {{ font-size:16px; font-weight:700; margin-bottom:3px; }}
   .section .d {{ color:var(--muted); font-size:13px; }}
   .card {{
     background:var(--card); border:1px solid var(--border);
-    border-radius:14px; padding:20px;
+    border-radius:14px; padding:18px 20px; min-width:0;
   }}
   .chart {{ width:100%; height:360px; }}
   .chart-sm {{ width:100%; height:280px; }}
-  table {{ width:100%; border-collapse:collapse; font-size:14px; }}
+  .table-wrap {{ width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }}
+  table {{ width:100%; border-collapse:collapse; font-size:14px; min-width:520px; }}
   th {{ text-align:left; color:var(--muted); font-weight:500; font-size:12px;
-       padding:10px 8px; border-bottom:1px solid var(--border); }}
-  td {{ padding:14px 8px; border-bottom:1px solid var(--border); }}
+       padding:10px 8px; border-bottom:1px solid var(--border); white-space:nowrap; }}
+  td {{ padding:13px 8px; border-bottom:1px solid var(--border); white-space:nowrap; }}
   tr:last-child td {{ border-bottom:none; }}
   .up {{ color:var(--up); }}
   .down {{ color:var(--down); }}
@@ -165,19 +170,42 @@ html = f"""<!DOCTYPE html>
   .tag.pass {{ background:#12291f; color:var(--down); }}
   .tag.no {{ background:#251d1d; color:#8b93a7; }}
   .action-box {{
-    display:flex; align-items:center; gap:14px;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
     background:var(--card); border:1px solid var(--border);
-    border-radius:14px; padding:20px; margin-top:16px;
+    border-radius:14px; padding:18px 20px; margin-top:16px;
   }}
   .action-box .big-tag {{
-    font-size:18px; font-weight:700; padding:8px 18px; border-radius:10px;
+    font-size:17px; font-weight:700; padding:8px 18px; border-radius:10px;
     white-space:nowrap;
   }}
-  .action-box .detail {{ color:var(--muted); font-size:14px; }}
-  .footer {{ color:var(--muted); font-size:12px; text-align:center; margin-top:40px; }}
-  @media (max-width:720px) {{
-    .metrics {{ grid-template-columns:repeat(2,1fr); }}
+  .action-box .detail {{ color:var(--muted); font-size:14px; flex:1; min-width:200px; }}
+  .footer {{ color:var(--muted); font-size:12px; text-align:center; margin-top:40px; line-height:1.8; }}
+
+  @media (max-width:900px) {{
+    .hero {{ grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; }}
+    .hero .big {{ padding:14px; }}
+    .hero .big .num {{ font-size:24px; }}
+    .metrics {{ grid-template-columns:repeat(2, minmax(0,1fr)); }}
+    .chart {{ height:320px; }}
+  }}
+  @media (max-width:640px) {{
+    body {{ padding:16px 14px 48px; }}
     .head {{ flex-direction:column; align-items:flex-start; }}
+    .head .title {{ font-size:20px; }}
+    .date-badge {{ white-space:normal; }}
+    .hero {{ grid-template-columns:1fr; gap:10px; }}
+    .hero .big {{ padding:16px; }}
+    .hero .big .num {{ font-size:26px; }}
+    .metrics {{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }}
+    .metrics .m {{ padding:12px; }}
+    .metrics .m .num {{ font-size:18px; }}
+    .section .h {{ font-size:15px; }}
+    .card {{ padding:14px; }}
+    .chart {{ height:260px; }}
+    .chart-sm {{ height:220px; }}
+    .action-box {{ flex-direction:column; align-items:flex-start; gap:10px; }}
+    .action-box .detail {{ min-width:0; }}
+    table {{ min-width:460px; }}
   }}
 </style>
 </head>
@@ -230,10 +258,12 @@ html = f"""<!DOCTYPE html>
     <div class="d">精确份额与成本价（不复权真实价口径）</div>
   </div>
   <div class="card">
-    <table>
-      <thead><tr><th>标的</th><th>持有份额</th><th>成本价</th><th>现价</th><th>浮动盈亏</th></tr></thead>
-      <tbody id="holdBody"></tbody>
-    </table>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>标的</th><th>持有份额</th><th>成本价</th><th>现价</th><th>浮动盈亏</th></tr></thead>
+        <tbody id="holdBody"></tbody>
+      </table>
+    </div>
   </div>
 
   <div class="action-box">
@@ -246,10 +276,12 @@ html = f"""<!DOCTYPE html>
     <div class="d">20 日动量 &gt; 0 且波动率 ≤ 2% 才通过筛选</div>
   </div>
   <div class="card">
-    <table>
-      <thead><tr><th>标的</th><th>20日动量</th><th>波动率</th><th>现价</th><th>筛选</th></tr></thead>
-      <tbody id="sigBody"></tbody>
-    </table>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>标的</th><th>20日动量</th><th>波动率</th><th>现价</th><th>筛选</th></tr></thead>
+        <tbody id="sigBody"></tbody>
+      </table>
+    </div>
   </div>
 
   <div class="section">
