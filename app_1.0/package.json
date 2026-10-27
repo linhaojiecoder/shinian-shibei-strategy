@@ -1,6 +1,6 @@
 {
   "name": "shinian-shibei-strategy",
-  "version": "3.3.2",
+  "version": "3.5.1",
   "description": "慢富十倍·复利策略 · 慢慢变富 桌面应用",
   "main": "main.js",
   "author": "linhaojie",
@@ -14,6 +14,9 @@
     "productName": "慢富十倍·复利策略",
     "files": [
       "main.js",
+      "engine.js",
+      "preload.js",
+      "modules/**/*",
       "src/**/*"
     ],
     "mac": {
