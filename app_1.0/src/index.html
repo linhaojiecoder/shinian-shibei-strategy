@@ -356,19 +356,28 @@ function render(){
   const S = DATA.summary;
   const L = DATA.latest_state;
 
-  // 指标卡 —— 统一用 2014-01 起复利回放的期末数据
+  // 指标卡 —— 同花顺式六卡：总资产/总盈亏/当日盈亏/总市值/可用/仓位
   const total = L.total;
   const cash = L.cash;
   const market = L.market;
   const nav = L.nav;
-  const navPct = S.total_ret;
-  const ann = S.ann;
+  const posPnl = L.pos_total_pnl || 0;      // 持仓浮动盈亏金额
+  const dayPnl = L.today_pnl || 0;           // 今日盈亏
+  const posPnlPct = (total - posPnl) > 0 ? posPnl / (total - posPnl) * 100 : 0;  // 总盈亏%
+  const dayBase = (total - dayPnl);
+  const dayPct = dayBase > 0 ? dayPnl / dayBase * 100 : 0;   // 当日盈亏%
+  const upDown = v => v >= 0 ? 'var(--red)' : 'var(--green)';
+  const sg = v => v < 0 ? '-' : '';
+  const pnlHtml = (amt, pct) => `<span style="font-size:20px;font-weight:800;">${sg(amt)}${Math.round(amt).toLocaleString()}</span><span style="font-size:12px;font-weight:500;margin-left:6px;opacity:.85;">${sg(pct)}${pct.toFixed(2)}%</span>`;
+  const posPct = total > 0 ? (market / total * 100).toFixed(1) : '0';
 
   renderCards([
-    {cls:'c-gold', lbl:'总资产', val:'¥'+Math.round(total).toLocaleString(), sub:'净值 '+nav.toFixed(4)},
-    {cls:'c-blue', lbl:'持仓市值', val:'¥'+Math.round(market).toLocaleString(), sub: market>0?'持有中':'空仓'},
-    {cls:'c-green',lbl:'现金（货基）', val:'¥'+Math.round(cash).toLocaleString(), sub:'随时可动'},
-    {cls: navPct>=0?'c-red':'c-green', lbl:'累计收益', val:(navPct>=0?'+':'')+navPct.toFixed(2)+'%', sub:'年化 '+(ann>=0?'+':'')+ann.toFixed(2)+'% · 2014至今'},
+    {cls:'c-gold', lbl:'总资产', val:'¥'+Math.round(total).toLocaleString(), color:''},
+    {cls:'', lbl:'总盈亏', val:pnlHtml(posPnl, posPnlPct), color:upDown(posPnl)},
+    {cls:'', lbl:'当日盈亏', val:pnlHtml(dayPnl, dayPct), color:upDown(dayPnl)},
+    {cls:'c-blue', lbl:'总市值', val:'¥'+Math.round(market).toLocaleString(), color:''},
+    {cls:'c-green', lbl:'可用', val:'¥'+Math.round(cash).toLocaleString(), color:''},
+    {cls:'', lbl:'仓位', val:posPct+'%', color:''},
   ]);
 
   // 12年实测成绩横幅（已移除：按用户要求不再显示年化/回撤/夏普/卡玛/累计倍数）
@@ -385,7 +394,6 @@ function render(){
     document.getElementById('holdingsPanel').innerHTML = `<div class="empty"><span class="circle"></span>当前空仓，资金全部在货币基金</div>`;
   }else{
     const ud = v => v >= 0 ? 'var(--red)' : 'var(--green)';
-    const sg = v => v < 0 ? '-' : '';
     const fnum = v => Math.round(v).toLocaleString();
     let rows = '';
     for(const name of holdNames){
@@ -394,12 +402,15 @@ function render(){
       const pnlPct = (price && h.cost) ? ((price - h.cost) / h.cost * 100) : null;
       const col = ud(h.total_pnl);
       const colD = ud(h.day_pnl);
+      // 当日盈亏百分比 = 当日盈亏 / (市值 - 当日盈亏)，即相对昨日市值
+      const dayPnlPct = (h.mv && h.day_pnl != null && (h.mv - h.day_pnl) !== 0) ? (h.day_pnl / (h.mv - h.day_pnl) * 100) : null;
+      const sgn = v => v < 0 ? '-' : '+';
       rows += `<tr>
         <td><div class="ths-name" style="color:${col};">${name}</div><div class="ths-num">${fnum(h.mv)}</div></td>
-        <td style="text-align:right;"><div class="ths-num" style="color:${col};">${sg(h.total_pnl)}${fnum(h.total_pnl)}</div><div class="ths-num" style="color:${col};">${pnlPct==null?'—':(pnlPct>=0?'+':'')+pnlPct.toFixed(2)+'%'}</div></td>
+        <td style="text-align:right;"><div class="ths-num" style="color:${col};">${sgn(h.total_pnl)}${fnum(Math.abs(h.total_pnl))}</div><div class="ths-num" style="color:${col};">${pnlPct==null?'—':sgn(pnlPct)+Math.abs(pnlPct).toFixed(2)+'%'}</div></td>
         <td style="text-align:right;"><div class="ths-num">${h.shares.toLocaleString()}</div></td>
         <td style="text-align:right;"><div class="ths-num" style="color:${col};">${price==null?'—':price}</div><div class="ths-sub">${h.cost.toFixed(4)}</div></td>
-        <td style="text-align:right;"><div class="ths-num" style="color:${colD};">${sg(h.day_pnl)}${fnum(h.day_pnl)}</div></td>
+        <td style="text-align:right;"><div class="ths-num" style="color:${colD};">${sgn(h.day_pnl)}${fnum(Math.abs(h.day_pnl))}</div><div class="ths-num" style="color:${colD};">${dayPnlPct==null?'—':sgn(dayPnlPct)+Math.abs(dayPnlPct).toFixed(2)+'%'}</div></td>
         <td style="text-align:right;"><div class="ths-num">${h.weight==null?'—':h.weight.toFixed(2)+'%'}</div></td>
         <td style="text-align:right;"><div class="ths-num">${h.hold_days==null?'—':h.hold_days+' 天'}</div></td>
       </tr>`;
