@@ -24,7 +24,7 @@ year_ret = summary.get("year_ret", {})
 # 现价映射
 price_map = {s["name"]: s["price"] for s in signals}
 
-# 持仓明细（精确 shares + cost）
+# 持仓明细（精确 shares + cost + 增强字段）
 holdings = latest.get("holdings", {})
 rows = []
 for label, h in holdings.items():
@@ -32,10 +32,17 @@ for label, h in holdings.items():
     cost = h["cost"]
     price = price_map.get(label)
     pnl_pct = round((price - cost) / cost * 100, 2) if (price and cost) else None
+    mv = h.get("mv")
+    day_pnl = h.get("day_pnl")
+    total_pnl = h.get("total_pnl")
+    weight = h.get("weight")
+    hold_days = h.get("hold_days")
     rows.append({
         "label": label, "shares": shares, "cost": cost,
         "price": price, "pnl_pct": pnl_pct,
         "pnl_class": "up" if (pnl_pct or 0) >= 0 else "down",
+        "mv": mv, "day_pnl": day_pnl, "total_pnl": total_pnl,
+        "weight": weight, "hold_days": hold_days,
     })
 
 # 净值曲线（抽稀，全量 3102 点直接给前端，前端按需显示）
@@ -81,6 +88,17 @@ sharpe = summary["sharpe"]
 capital = d["capital"]
 cash = latest["cash"]
 market = latest["market"]
+today_pnl = latest.get("today_pnl", 0)
+asset_change = latest.get("asset_change", 0)
+pos_total_pnl = latest.get("pos_total_pnl", 0)
+
+# 今日总资产变动百分比（相对昨日）
+_prev_total = final_total - asset_change
+if _prev_total and asset_change:
+    asset_pct = round(asset_change / _prev_total * 100, 2)
+    asset_pct_s = f"（{'+' if asset_pct>=0 else ''}{asset_pct:.2f}%）"
+else:
+    asset_pct_s = ""
 
 up_color = "#e24b4a"      # 涨=红（A股习惯）
 down_color = "#1d9e75"    # 跌=绿
@@ -163,6 +181,7 @@ html = f"""<!DOCTYPE html>
   tr:last-child td {{ border-bottom:none; }}
   .up {{ color:var(--up); }}
   .down {{ color:var(--down); }}
+  .muted2 {{ color:var(--muted); font-size:11px; }}
   .tag {{
     display:inline-block; padding:3px 10px; border-radius:20px;
     font-size:12px; font-weight:600;
@@ -232,27 +251,20 @@ html = f"""<!DOCTYPE html>
 
   <div class="hero">
     <div class="big">
-      <div class="label">期末总资产</div>
+      <div class="label">总资产</div>
       <div class="num">¥{final_total:,.0f}</div>
-      <div class="note">累计收益 <span class="{ 'up' if total_ret>=0 else 'down' }">{total_ret:+.2f}%</span></div>
+      <div class="note">今日 <span class="{ 'up' if asset_change>=0 else 'down' }">{asset_change:+,.0f}</span>{asset_pct_s}</div>
     </div>
     <div class="big">
-      <div class="label">年化收益</div>
-      <div class="num { 'up' if ann>=0 else 'down' }">{ann:+.2f}%</div>
-      <div class="note">最大回撤 {mdd}%</div>
+      <div class="label">今日盈亏</div>
+      <div class="num { 'up' if today_pnl>=0 else 'down' }">{today_pnl:+,.0f}</div>
+      <div class="note">持仓浮动盈亏 {pos_total_pnl:+,.0f}</div>
     </div>
     <div class="big">
-      <div class="label">当前净值</div>
-      <div class="num">{final_nav:.2f}</div>
-      <div class="note">现金 ¥{cash:,.0f} · 持仓 ¥{market:,.0f}</div>
+      <div class="label">累计收益</div>
+      <div class="num { 'up' if total_ret>=0 else 'down' }">{total_ret:+.1f}%</div>
+      <div class="note">初始本金 ¥{capital:,}</div>
     </div>
-  </div>
-
-  <div class="metrics">
-    <div class="m"><div class="label">最大回撤</div><div class="num">-{mdd}%</div></div>
-    <div class="m"><div class="label">夏普比率</div><div class="num">{sharpe}</div></div>
-    <div class="m"><div class="label">累计收益</div><div class="num { 'up' if total_ret>=0 else 'down' }">{total_ret:+.1f}%</div></div>
-    <div class="m"><div class="label">交易次数</div><div class="num">{summary['trades']}</div></div>
   </div>
 
   <div class="section">
@@ -268,7 +280,7 @@ html = f"""<!DOCTYPE html>
   <div class="card">
     <div class="table-wrap">
       <table>
-        <thead><tr><th>标的</th><th>持有份额</th><th>成本价</th><th>现价</th><th>浮动盈亏</th></tr></thead>
+        <thead><tr><th>标的</th><th>持仓(份)</th><th>成本/现价</th><th>市值</th><th>当日盈亏</th><th>总盈亏</th><th>个股仓位</th><th>持股天数</th></tr></thead>
         <tbody id="holdBody"></tbody>
       </table>
     </div>
@@ -313,13 +325,20 @@ const DOWN = "{down_color}";
 
 const rows = P.rows;
 const hb = document.getElementById('holdBody');
+const fmtMoney = v => v==null ? '—' : '¥' + Math.round(v).toLocaleString();
+const fmtSigned = v => v==null ? '—' : (v>=0?'+':'') + Math.round(v).toLocaleString();
+const fmtPct = v => v==null ? '—' : (v>=0?'+':'') + v.toFixed(2) + '%';
+const cls = v => v==null ? '' : (v>=0?'up':'down');
 hb.innerHTML = rows.map(r => `
   <tr>
     <td style="font-weight:600">${{r.label}}</td>
     <td>${{r.shares.toLocaleString()}}</td>
-    <td>${{r.cost.toFixed(4)}}</td>
-    <td>${{r.price}}</td>
-    <td class="${{r.pnl_class}}">${{(r.pnl_pct>=0?'+':'') + r.pnl_pct.toFixed(2)}}%</td>
+    <td>${{r.cost.toFixed(4)}}<br><span class="muted2">${{r.price}}</span></td>
+    <td>${{fmtMoney(r.mv)}}</td>
+    <td class="${{cls(r.day_pnl)}}">${{fmtSigned(r.day_pnl)}}</td>
+    <td class="${{cls(r.total_pnl)}}">${{fmtSigned(r.total_pnl)}}<br><span class="muted2">${{fmtPct(r.pnl_pct)}}</span></td>
+    <td>${{r.weight==null?'—':r.weight.toFixed(2)+'%'}}</td>
+    <td>${{r.hold_days==null?'—':r.hold_days+'天'}}</td>
   </tr>`).join('');
 
 const sb = document.getElementById('sigBody');

@@ -48,6 +48,44 @@ for code, name in NAMES:
 passed = sorted([s for s in signals if s["pass"]], key=lambda s: -s["mom"])
 buy_list = [s["name"] for s in passed[:2]]
 
+# ===== 增强持仓字段：市值、当日盈亏、个股仓位、持股天数、总盈亏金额 =====
+LABEL2CODE = {name: code for code, name in NAMES}
+CUR_PRICE = {name: close[code][dates[i]] for code, name in NAMES}
+PREV_CLOSE = {name: close[code][dates[i-1]] for code, name in NAMES}  # 昨日收盘
+
+# 当前连续持仓起始日（从 hold_series 反推：最近一次从 0 → >0 的日期）
+cont_start = {}
+for label in latest_holdings:
+    start = None
+    prev_shares = 0
+    for h in hold_series:
+        sh = h.get("holdings", {}).get(label, {}).get("shares", 0)
+        if prev_shares == 0 and sh > 0:
+            start = h["date"]
+        prev_shares = sh
+    cont_start[label] = start
+
+total_asset = last["total"]
+for label, h in latest_holdings.items():
+    shares = h["shares"]
+    cost = h["cost"]
+    price = CUR_PRICE.get(label)
+    prev = PREV_CLOSE.get(label)
+    mv = round(shares * price, 0) if price else None                       # 市值
+    day_pnl = round(shares * (price - prev), 0) if (price and prev) else None  # 当日盈亏
+    total_pnl = round(shares * (price - cost), 0) if (price and cost) else None  # 总盈亏金额
+    weight = round(mv / total_asset * 100, 2) if (mv and total_asset) else None  # 个股仓位%
+    # 持股天数（自然日，从连续持仓起始日到最新日）
+    hold_days = None
+    if cont_start.get(label):
+        hold_days = (datetime.strptime(last["date"], "%Y-%m-%d")
+                     - datetime.strptime(cont_start[label], "%Y-%m-%d")).days
+    h["mv"] = mv
+    h["day_pnl"] = day_pnl
+    h["total_pnl"] = total_pnl
+    h["weight"] = weight
+    h["hold_days"] = hold_days
+
 # 当前实际持仓（从期末精确持仓取 label 列表）
 current_hold_labels = list(latest_holdings.keys())  # 例如 ['标普500ETF', '纳指ETF']
 
@@ -74,6 +112,11 @@ nav_dates = [x["date"] for x in nav_series]
 base0 = hs300_close[nav_dates[0]]
 hs300_series = [{"date": d, "nav": round(hs300_close[d]/base0, 6)} for d in nav_dates]
 
+# 今日总盈亏 / 总资产变动（用于 HTML 顶部主指标）
+today_pnl_total = sum(h["day_pnl"] for h in latest_holdings.values() if h.get("day_pnl") is not None)
+asset_change = round(last["total"] - nav_series[-2]["total"], 0) if len(nav_series) >= 2 else 0
+pos_total_pnl = sum(h["total_pnl"] for h in latest_holdings.values() if h.get("total_pnl") is not None)
+
 app_data = {
     "strategy_name": "慢富十倍·复利策略",
     "slogan": "慢慢变富，与时间为友",
@@ -91,6 +134,9 @@ app_data = {
         "total": last["total"], "nav": last["nav"], "cash": last["cash"],
         "market": last["market"], "holds_label": latest_holds,
         "holdings": latest_holdings,
+        "today_pnl": today_pnl_total,
+        "asset_change": asset_change,
+        "pos_total_pnl": pos_total_pnl,
     },
     "nav_series": nav_series,
     "hold_series": hold_series,
