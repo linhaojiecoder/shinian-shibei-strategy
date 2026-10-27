@@ -232,8 +232,33 @@ function buildPayload() {
   const state = ctx.state;
   const realtimePrices = ctx.realtimePrices;
   const HIST = ctx.HIST;
-  const { sig, latest, closeOn, navNow } = r;
+  const { sig, latest, closeOn, navNow, common } = r;
   const { plan, each, total } = trading.computeTargetPlan(sig, closeOn);
+
+  // ---- 推算「下次调仓信号日」：双周周五（周五 + (i//5)%2==0 相位）----
+  function nextRebalanceInfo() {
+    // 相位锚点：最近一次已发生的调仓信号日（pending 里的 signalDate 是最近一次双周调仓日）
+    const lastSignalDate = state.pending && state.pending.signalDate ? state.pending.signalDate : null;
+
+    // 从 latest 之后的第一个自然日开始，逐日往后找第一个「周五且满足双周相位」的交易日
+    const cur = new Date(latest + 'T00:00:00');
+    for (let offset = 1; offset <= 60; offset++) {
+      const d = new Date(cur.getTime() + offset * 86400000);
+      const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      if (!eng.isFriday(ds)) continue;              // 只看周五
+      if (!eng.isTradingDay(ds)) continue;          // 跳过节假日（周五休市）
+      // 双周相位校验：距最近一次调仓信号日相差 14 天整数倍（保持同一双周节奏）
+      if (lastSignalDate) {
+        const a = new Date(lastSignalDate + 'T00:00:00');
+        const diffDays = Math.round((d - a) / 86400000);
+        if (diffDays <= 0) continue;
+        if (diffDays % 14 !== 0) continue;
+      }
+      return { date: ds, weekday: '周五' };
+    }
+    return null;
+  }
+  const nextRebalance = nextRebalanceInfo();
 
   const holdings = [];
   let totalAssets = state.cash;
@@ -361,6 +386,7 @@ function buildPayload() {
     total,
     tradeLog: (state.tradeLog || []).slice(-20).reverse(), // 最近20笔交易
     pendingSignal: state.pending ? { date: state.pending.signalDate, target: state.pending.target.map(c => eng.LABEL[c]), scale: state.pending.scale } : null,
+    nextRebalance,
     isPaperTrading: true,
     lastUpdate: new Date().toLocaleString('zh-CN'),
   };

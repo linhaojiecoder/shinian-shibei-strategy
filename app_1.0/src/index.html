@@ -592,6 +592,20 @@ function renderLive(p) {
 
   // 今日操作（用 actionContent 包裹，供眼睛按钮隐藏/显示）
   const ap = document.getElementById('todayActionPanel');
+
+  // 下次调仓预告（倒计时 + 说明），两个分支都展示
+  let nextRebHtml = '';
+  if (p.nextRebalance && p.nextRebalance.date) {
+    const nb = new Date(p.nextRebalance.date + 'T00:00:00');
+    const now = new Date();
+    const daysLeft = Math.max(0, Math.round((nb - now) / 86400000));
+    nextRebHtml = `<div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);">
+      <div style="font-size:13px;"><b style="color:var(--gold);">🗓 下次调仓：${p.nextRebalance.date}（周五）</b>
+        <span style="color:var(--muted);">距今 <b style="color:var(--text);">${daysLeft} 天</b></span></div>
+      <div style="margin-top:4px;font-size:12px;color:var(--muted);">收盘算动量信号 → 次一交易日开盘自动执行买卖。若届时无标的通过（20日动量&gt;0 且 波动≤2%），则空仓或维持现状。</div>
+    </div>`;
+  }
+
   if (p.isRebalance) {
     const actHtml = (p.actions || []).map(a => {
       const color = a.type === 'buy' ? 'var(--red)' : (a.type === 'sell' || a.type === 'reduce') ? 'var(--green)' : 'var(--muted)';
@@ -604,11 +618,12 @@ function renderLive(p) {
       <div style="font-size:14px;font-weight:700;color:var(--gold);margin-bottom:8px;">📌 今日为双周调仓日（${p.latest}），操作指令：</div>
       ${actHtml || '<div style="color:var(--muted);font-size:13px;">无操作（保持现状）</div>'}
       <div style="margin-top:10px;font-size:12px;color:var(--muted);">目标总仓位 ${(p.scale*100).toFixed(0)}%，每标的大约 ¥${Math.round(p.each||0).toLocaleString()}。次一交易日开盘自动执行。</div>
+      ${nextRebHtml}
     </div>`;
   } else {
     ap.innerHTML = `<div class="action-content" id="actionContent" style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-size:13px;">
       <div><b style="color:var(--text);">今日不交易</b><span style="color:var(--muted);">（${p.latest} 非双周调仓日）——持仓不动，只记录净值。</span></div>
-      <div style="margin-top:6px;color:var(--muted);">下次调仓：双周周五收盘算信号，次一交易日开盘自动买卖。${p.note ? `当前过滤：${p.note.replace('仅 1 只通过过滤','只有 1 只满足，届时只买 1 只（另留现金）')}。` : ''}</div>
+      ${nextRebHtml}
     </div>`;
   }
 
