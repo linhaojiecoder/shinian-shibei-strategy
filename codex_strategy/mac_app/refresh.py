@@ -61,6 +61,16 @@ result = engine.simulate(prices, days, actions, indices)
 last = result['ledger'][-1]
 latest_signal = result['signals'][-1] if result['signals'] else None
 latest_orders = [order for order in result['orders'] if order['date'] == days[-1]]
+pending_signal = latest_signal if latest_signal and latest_signal['date'] == days[-1] else None
+# Future common trading days are unknown. This is only a weekday-based estimate.
+candidate, candidate_index = dt.date.fromisoformat(days[-1]), len(days) - 1
+while True:
+    candidate += dt.timedelta(days=1)
+    if candidate.weekday() >= 5:
+        continue
+    candidate_index += 1
+    if candidate.weekday() == 4 and (candidate_index // 5) % 2 == 0:
+        break
 previous = result['ledger'][-2]
 details = {}
 for code, holding in last['holdings'].items():
@@ -88,6 +98,7 @@ for code in engine.CODES:
                     'price': prices[code][days[-1]][1]}
 output = {'asof':days[-1], 'metrics':result['metrics'], 'state':last,
           'latest_signal':latest_signal, 'latest_orders':latest_orders,
+          'pending_signal': pending_signal, 'candidate_signal_date': candidate.isoformat(),
           'position_details': details, 'scores': scores,
           'daily_change': last['total'] - previous['total'],
           'daily_change_pct': (last['total'] / previous['total'] - 1) * 100,

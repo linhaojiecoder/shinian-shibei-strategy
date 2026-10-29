@@ -1,7 +1,7 @@
 {
   "name": "manfu-codex-v1",
   "productName": "慢富十倍·Codex V1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "main": "main.js"
 }
