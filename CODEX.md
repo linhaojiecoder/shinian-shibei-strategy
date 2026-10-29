@@ -5,7 +5,7 @@
 
 ## 一句话定位
 
-一个只服务用户本人的 A 股 ETF 复利策略体系，包含：数据回测、每日复盘报告（HTML）、公众号自动发草稿。核心诉求是「慢慢变富，与时间为友」，数据必须**永远自洽**（历史上反复出现「收益对不上」的 bug）。
+一个只服务用户本人的 A 股 ETF 复利策略体系，包含：数据回测、每日复盘报告（HTML）与策略迭代。核心诉求是「慢慢变富，与时间为友」，数据必须**永远自洽**（历史上反复出现「收益对不上」的 bug）。
 
 ## 项目根目录
 
@@ -19,7 +19,7 @@
 
 | 路径 | 作用 |
 |------|------|
-| `app_1.0/src/data.json` | **最终数据源**（含 latest_state.holdings 精确持仓 + data_version），App/复盘/公众号都读它 |
+| `app_1.0/src/data.json` | **最终数据源**（含 latest_state.holdings 精确持仓 + data_version），App 与复盘共用 |
 | `backtest_data/prices_true_nofq.json` | 权威不复权历史价（唯一成交价来源，腾讯 kline 产出） |
 | `backtest_data/events_table.json` | 权威事件表（份额拆分 1:5 / 1:2、现金分红） |
 | `backtest_data/sim_v4.json` | 诚实版回测结果 |
@@ -27,9 +27,7 @@
 | `gen_data_full.py` | 跑回测后导出 App/skill 共用的 data.json |
 | `gen_report_html.py` | 生成复盘报告 HTML |
 | `sim_v4.py` | 诚实版回测引擎（含 split_trigger 拆分处理） |
-| `wechat_publish/publish.py` | 公众号自动发草稿（点评 + 截图封面 + 建草稿） |
-| `wechat_publish/gen_curve.py` | 用 PIL 手绘金色净值曲线图（nav_curve.png） |
-| `wechat_publish/config.local.json` | 公众号 AppID/AppSecret（已 gitignore，需用户手动填） |
+| `wechat_publish/` | 公众号旧功能，已搁置；文件保留但不运行、不维护、不配置 |
 | `~/.workbuddy/skills/shinian-shibei/` | WorkBuddy skill（含 SKILL.md 数据口径铁律） |
 
 ## 数据口径铁律（最重要，违反必出 bug）
@@ -58,18 +56,15 @@ python3 ~/.workbuddy/skills/shinian-shibei/scripts/gen_review.py
 
 跑完核对打印输出的关键指标（累计收益/年化/回撤/夏普/期末总资产），必须与 `obsidian-vault/03-每日沟通日志/` 上次记录自洽。若跨日跳变异常，说明口径又出问题，立即停下排查。
 
-## 公众号自动发草稿
+## 公众号功能：已搁置
 
-```bash
-cd /Users/linhaojie/WorkBuddy/2026-10-12-21-59-24
-python3 wechat_publish/publish.py --dry    # 只生成文章+封面，不调微信接口（先看效果）
-python3 wechat_publish/publish.py          # 正式：上传封面 + 建草稿（需 config.local.json 有 AppID/AppSecret）
-python3 wechat_publish/publish.py --force  # 忽略当天去重锁，强制重发
-```
+`wechat_publish/` 相关的 AppID、AppSecret、`config.local.json`、文章/封面生成和微信草稿均不属于当前交付目标，也不作为任何流程的前置条件或卡点。保留现有文件，不删除；除非用户明确重新启用，否则不运行、不维护、不检查该目录。
 
-流程：读 data.json → 写点评（炸弹开头 + 反常识 + 说真话散户视角）→ 手绘金色净值曲线 → 转内联样式 HTML → 上传封面 → draft/add 建草稿。**幂等去重**：同一天只建一篇（`published_lock.json` 记录）。
+## 当前正式职责
 
-注意：公众号群发接口对未认证个人订阅号不可用（微信 2025-07 起收回），所以脚本只建草稿，用户手机上手动点「发表」。
+1. 每日复盘：按本文件规定的四步流程生成并核对结果。
+2. 方案与策略代码：按四条数据口径铁律改动、验证。
+3. Git 交接：代码或流程改动验证后自动 `git add`、`git commit`、`git push`；若本机 Git 认证失效，明确提醒用户处理认证，不反复重试或卡住。
 
 ## 关键口径速查
 
