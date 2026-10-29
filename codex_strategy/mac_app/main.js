@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, powerMonitor } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const { execFile } = require('child_process');
@@ -24,7 +24,8 @@ ipcMain.handle('refresh', async () => run('refresh'));
 app.whenReady().then(() => {
   const win = new BrowserWindow({ width: 1180, height: 820, minWidth: 800, minHeight: 600,
     title: '慢富十倍·Codex V1', backgroundColor: '#0f1621',
-    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true } });
+    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false } });
+  powerMonitor.on('resume', () => { if (!win.isDestroyed()) win.webContents.send('resume'); });
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', e => e.preventDefault());
   win.loadFile(path.join(__dirname, 'index.html'));

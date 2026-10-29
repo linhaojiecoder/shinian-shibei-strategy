@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import math
 from pathlib import Path
 import engine
 
@@ -32,6 +33,7 @@ if mode == 'refresh':
             raise ValueError('行情包含尚未收盘的数据')
         previous_path = data_dir / 'market.json'
         previous = json.loads((previous_path if previous_path.exists() else root / 'baseline.json').read_text())
+        previous_asof = max(set.intersection(*(set(dict(previous['prices'][code])) for code in engine.CODES)))
         for code in engine.CODES:
             old_prices = dict(previous['prices'][code])
             new_prices = dict(data['prices'][code])
@@ -43,8 +45,11 @@ if mode == 'refresh':
                 new_events = data['actions'][code][kind]
                 if any(event not in new_events for event in old_events):
                     raise ValueError(f'{code} 历史分红/拆分数据变化，需先核查；未替换原数据')
+                date_key = 'ex_date' if kind == 'dividends' else 'date'
+                if any(event not in old_events and event[date_key] <= previous_asof for event in new_events):
+                    raise ValueError(f'{code} 出现新增历史分红/拆分，需先核查；未替换原数据')
         prices, days, actions, indices = engine.prepare(data)
-        if len(days) < 1000 or days[-1] < '2026-10-29':
+        if len(days) < 1000 or days[-1] < previous_asof:
             raise ValueError('共同交易日不足或行情倒退，已保留原有数据')
         pending_market = data
 else:
@@ -56,8 +61,36 @@ result = engine.simulate(prices, days, actions, indices)
 last = result['ledger'][-1]
 latest_signal = result['signals'][-1] if result['signals'] else None
 latest_orders = [order for order in result['orders'] if order['date'] == days[-1]]
+previous = result['ledger'][-2]
+details = {}
+for code, holding in last['holdings'].items():
+    share = holding['shares']
+    close = prices[code][days[-1]][1]
+    prior_holding = previous['holdings'].get(code)
+    has_event = bool(actions.get((code, days[-1]))) or any(order['code'] == code for order in latest_orders)
+    # Per-position daily P&L is not reliably comparable on trade/event days.
+    daily = (share * (close - prices[code][days[-2]][1])
+             if prior_holding and prior_holding['shares'] == share and not has_event else None)
+    first = len(days) - 1
+    while first > 0 and code in result['ledger'][first - 1]['holdings']:
+        first -= 1
+    details[code] = {'market': share * close, 'profit': share * (close - holding['cost']),
+                     'daily_profit': daily, 'weight': share * close / last['total'],
+                     'holding_days': (dt.date.fromisoformat(days[-1]) - dt.date.fromisoformat(days[first])).days + 1}
+scores = {}
+i = len(days) - 1
+for code in engine.CODES:
+    seq = indices[code]
+    daily_returns = [seq[j] / seq[j - 1] - 1 for j in range(i - 19, i + 1)]
+    mean = sum(daily_returns) / 20
+    scores[code] = {'momentum': seq[i] / seq[i - 20] - 1,
+                    'volatility': math.sqrt(sum((x - mean) ** 2 for x in daily_returns) / 20),
+                    'price': prices[code][days[-1]][1]}
 output = {'asof':days[-1], 'metrics':result['metrics'], 'state':last,
           'latest_signal':latest_signal, 'latest_orders':latest_orders,
+          'position_details': details, 'scores': scores,
+          'daily_change': last['total'] - previous['total'],
+          'daily_change_pct': (last['total'] / previous['total'] - 1) * 100,
           'latest_prices':{code:prices[code][days[-1]][1] for code in engine.CODES},
           'nav': [{'date':row['date'], 'total':row['total']} for row in result['ledger']],
           'source':'新浪不复权行情 / 天天基金分红与拆分', 'generated_at':dt.datetime.now().astimezone().isoformat(),
